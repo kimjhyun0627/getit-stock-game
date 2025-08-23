@@ -42,10 +42,12 @@ async function bootstrap() {
   console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔌 포트: ${port}`);
 
-  // 글로벌 접두사 설정
-  app.setGlobalPrefix('api');
-
   await app.listen(port, '0.0.0.0'); // 모든 인터페이스에서 리스닝
+
+  // 글로벌 접두사 설정 (헬스체크 경로 제외)
+  app.setGlobalPrefix('api', {
+    exclude: ['/', '/health', '/hello'],
+  });
 
   // 시드 데이터 삽입
   try {
@@ -58,5 +60,6 @@ async function bootstrap() {
   console.log(`🚀 주식게임 백엔드 서버가 포트 ${port}에서 실행 중입니다!`);
   console.log(`💚 헬스체크: http://localhost:${port}/health`);
   console.log(`🌐 API 엔드포인트: http://localhost:${port}/api`);
+  console.log(`🏠 루트 경로: http://localhost:${port}/`);
 }
 bootstrap();
