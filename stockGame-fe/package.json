@@ -10,11 +10,11 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch --passWithNoTests",
-    "test:cov": "jest --coverage --passWithNoTests",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --passWithNoTests",
-    "test:e2e": "jest --config ./test/jest-e2e.json --passWithNoTests"
+    "test": "vitest --environment jsdom",
+    "test:watch": "vitest --watch --environment jsdom",
+    "test:coverage": "vitest --coverage --environment jsdom",
+    "test:ui": "vitest --ui --environment jsdom",
+    "test:e2e": "vitest --run"
   },
   "homepage": "https://kimjhyun0627.github.io/getit-stock-game",
   "dependencies": {
@@ -39,6 +39,10 @@
     "tailwindcss": "^4.1.12",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vitest": "^2.1.8",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "jsdom": "^25.0.1"
   }
 }
