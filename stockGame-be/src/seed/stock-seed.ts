@@ -1,0 +1,58 @@
+import { Stock } from '../common/entities/stock.entity';
+
+export const stockSeeds: Partial<Stock>[] = [
+  {
+    name: 'A전자',
+    symbol: '005930',
+    currentPrice: 75000,
+    previousPrice: 74500,
+    change: 500,
+    changePercent: 0.67,
+    volume: 15000000,
+  },
+  {
+    name: 'B하이닉스',
+    symbol: '000660',
+    currentPrice: 125000,
+    previousPrice: 123000,
+    change: 2000,
+    changePercent: 1.63,
+    volume: 8000000,
+  },
+  {
+    name: 'NAVER',
+    symbol: '035420',
+    currentPrice: 185000,
+    previousPrice: 182000,
+    change: 3000,
+    changePercent: 1.65,
+    volume: 3000000,
+  },
+  {
+    name: '카카오',
+    symbol: '035720',
+    currentPrice: 52000,
+    previousPrice: 51500,
+    change: 500,
+    changePercent: 0.97,
+    volume: 5000000,
+  },
+  {
+    name: 'LG에너지솔루션',
+    symbol: '373220',
+    currentPrice: 450000,
+    previousPrice: 448000,
+    change: 2000,
+    changePercent: 0.45,
+    volume: 2000000,
+  },
+  {
+    name: '현대차',
+    symbol: '005380',
+    currentPrice: 185000,
+    previousPrice: 183000,
+    change: 2000,
+    changePercent: 1.09,
+    volume: 4000000,
+  },
+];
