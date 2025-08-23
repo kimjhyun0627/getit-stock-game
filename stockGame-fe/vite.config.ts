@@ -7,8 +7,12 @@ export default defineConfig({
   base: '/getit-stock-game/',
   build: {
     outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   },
   server: {
     port: 3000,
