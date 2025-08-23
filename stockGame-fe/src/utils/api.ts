@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://your-railway-app.railway.app/api'; // Railway 배포 URL로 변경 필요
+const API_BASE_URL = 'https://getit-stock-game.railway.app/api';
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('accessToken');

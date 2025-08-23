@@ -2,11 +2,9 @@ export default () => ({
   port: parseInt(process.env.PORT || '3000', 10),
   cors: {
     allowedOrigins: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:5173',
       'https://kimjhyun0627.github.io',
       'https://getit-stock-game.vercel.app',
+      'https://getit-stock-game.railway.app',
       process.env.FRONTEND_URL,
     ].filter(Boolean),
   },
@@ -27,6 +25,6 @@ export default () => ({
     clientSecret: process.env.KAKAO_CLIENT_SECRET || 'your-kakao-client-secret',
     redirectUri:
       process.env.KAKAO_REDIRECT_URI ||
-      'https://your-railway-app.railway.app/api/auth/kakao/callback',
+      'https://getit-stock-game.railway.app/api/auth/kakao/callback',
   },
 });

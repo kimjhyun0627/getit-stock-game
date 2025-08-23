@@ -36,6 +36,7 @@ async function bootstrap() {
   const allowedOrigins = [
     'https://kimjhyun0627.github.io',
     'https://getit-stock-game.vercel.app',
+    'https://getit-stock-game.railway.app',
   ];
 
   console.log('🌐 허용된 CORS 도메인:', allowedOrigins);
@@ -44,7 +45,19 @@ async function bootstrap() {
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Origin',
+      'Accept',
+      'Cache-Control',
+      'X-File-Name',
+    ],
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    maxAge: 86400, // 24시간
   });
 
   const port = process.env.PORT || 3000;
@@ -67,8 +80,8 @@ async function bootstrap() {
   }
 
   console.log(`🚀 주식게임 백엔드 서버가 포트 ${port}에서 실행 중입니다!`);
-  console.log(`💚 헬스체크: http://localhost:${port}/health`);
-  console.log(`🌐 API 엔드포인트: http://localhost:${port}/api`);
-  console.log(`🏠 루트 경로: http://localhost:${port}/`);
+  console.log(`💚 헬스체크: https://getit-stock-game.railway.app/health`);
+  console.log(`🌐 API 엔드포인트: https://getit-stock-game.railway.app/api`);
+  console.log(`🏠 루트 경로: https://getit-stock-game.railway.app/`);
 }
 bootstrap();

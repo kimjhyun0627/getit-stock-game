@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'https://zonal-forgiveness.railway.app/api', // Railway 배포 URL로 변경 필요
+  BASE_URL: 'https://getit-stock-game.railway.app/api',
   TIMEOUT: 10000,
   ADMIN_ENDPOINTS: {
     DASHBOARD: '/admin/dashboard',
