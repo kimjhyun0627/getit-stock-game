@@ -12,7 +12,11 @@ export class AppController {
   }
 
   @Get('health')
-  getHealth(): string {
-    return 'OK';
+  getHealth(): { status: string; timestamp: string; uptime: number } {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    };
   }
 }
