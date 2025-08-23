@@ -15,6 +15,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
+    credentials: 'include', // CORS credentials 포함
   });
 
   if (response.status === 401) {

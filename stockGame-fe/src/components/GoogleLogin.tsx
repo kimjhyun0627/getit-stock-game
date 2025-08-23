@@ -8,7 +8,7 @@ const GoogleLogin: React.FC<GoogleLoginProps> = ({ onLogin }) => {
   const handleGoogleLogin = async () => {
     try {
       // 백엔드에서 구글 OAuth URL 가져오기
-      const response = await fetch('http://localhost:3000/api/auth/google/login');
+      const response = await fetch('https://getit-stock-game.vercel.app/api/auth/google/login');
       const data = await response.json();
       
       if (data.url) {
