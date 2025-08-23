@@ -27,6 +27,6 @@ export default () => ({
     clientSecret: process.env.KAKAO_CLIENT_SECRET || 'your-kakao-client-secret',
     redirectUri:
       process.env.KAKAO_REDIRECT_URI ||
-      'http://localhost:3000/api/auth/kakao/callback',
+      'https://your-railway-app.railway.app/api/auth/kakao/callback',
   },
 });

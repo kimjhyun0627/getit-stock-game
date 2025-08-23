@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  BASE_URL: 'https://zonal-forgiveness.railway.app/api', // Railway 배포 URL로 변경 필요
   TIMEOUT: 10000,
   ADMIN_ENDPOINTS: {
     DASHBOARD: '/admin/dashboard',
