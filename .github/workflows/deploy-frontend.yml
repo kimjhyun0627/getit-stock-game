@@ -3,7 +3,7 @@ name: Deploy Frontend to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ['frontend/**', '.github/workflows/deploy-frontend.yml']
+    paths: ['stockGame-fe/**', '.github/workflows/deploy-frontend.yml']
 
 jobs:
   deploy:
@@ -22,16 +22,16 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: './frontend/package-lock.json'
+        cache-dependency-path: './stockGame-fe/package-lock.json'
     
     - name: Install dependencies
       run: |
-        cd frontend
+        cd stockGame-fe
         npm ci
     
     - name: Build
       run: |
-        cd frontend
+        cd stockGame-fe
         npm run build
       env:
         VITE_API_URL: ${{ secrets.VITE_API_URL }}
@@ -44,7 +44,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './frontend/dist'
+        path: './stockGame-fe/dist'
     
     - name: Deploy to GitHub Pages
       id: deployment

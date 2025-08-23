@@ -3,7 +3,7 @@ name: Deploy Backend to Railway
 on:
   push:
     branches: [main]
-    paths: ['backend/**', '.github/workflows/deploy-backend.yml']
+    paths: ['stockGame-be/**', '.github/workflows/deploy-backend.yml']
 
 jobs:
   deploy:
@@ -18,16 +18,16 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: './backend/package-lock.json'
+        cache-dependency-path: './stockGame-be/package-lock.json'
     
     - name: Install dependencies
       run: |
-        cd backend
+        cd stockGame-be
         npm ci
     
     - name: Build
       run: |
-        cd backend
+        cd stockGame-be
         npm run build
     
     - name: Deploy to Railway
