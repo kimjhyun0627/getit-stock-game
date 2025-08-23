@@ -77,7 +77,7 @@ function App() {
 
 
   return (
-    <Router>
+    <Router basename="/getit-stock-game">
       <div className="App">
                 <Navigation 
           isLoggedIn={isLoggedIn} 

@@ -110,5 +110,6 @@ async function bootstrap() {
   console.log(`💚 헬스체크: https://getit-stock-game.railway.app/health`);
   console.log(`🌐 API 엔드포인트: https://getit-stock-game.railway.app/api`);
   console.log(`🏠 루트 경로: https://getit-stock-game.railway.app/`);
+  console.log(`🌐 허용된 CORS 도메인: ${corsOrigins}`);
 }
 bootstrap();
