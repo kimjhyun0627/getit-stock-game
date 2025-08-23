@@ -52,12 +52,12 @@ async function bootstrap() {
   console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔌 포트: ${port}`);
 
-  await app.listen(port, '0.0.0.0'); // 모든 인터페이스에서 리스닝
-
-  // 글로벌 접두사 설정 (헬스체크 경로 제외)
+  // 글로벌 접두사 설정 (헬스체크 경로 제외) - 서버 시작 전에 설정
   app.setGlobalPrefix('api', {
     exclude: ['/', '/health', '/hello'],
   });
+
+  await app.listen(port, '0.0.0.0'); // 모든 인터페이스에서 리스닝
 
   // 시드 데이터 삽입
   try {

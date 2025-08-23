@@ -9,18 +9,8 @@ export class AppController {
 
   @Get()
   @Public()
-  getRoot(): {
-    status: string;
-    message: string;
-    timestamp: string;
-    uptime: number;
-  } {
-    return {
-      status: 'ok',
-      message: 'Stock Game Backend is running',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    };
+  getRoot(): string {
+    return 'OK';
   }
 
   @Get('health')
