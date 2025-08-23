@@ -62,14 +62,14 @@ async function bootstrap() {
     maxAge: 86400, // 24시간
   });
 
-  const port = process.env.PORT || 3000;
-  console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔌 포트: ${port}`);
-
-  // 글로벌 접두사 설정 (헬스체크 경로 제외) - 서버 시작 전에 설정
+  // 글로벌 접두사 설정 (헬스체크 경로 제외) - CORS 설정 직후에 설정
   app.setGlobalPrefix('api', {
     exclude: ['/', '/health', '/hello'],
   });
+
+  const port = process.env.PORT || 3000;
+  console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔌 포트: ${port}`);
 
   await app.listen(port, '0.0.0.0'); // 모든 인터페이스에서 리스닝
 
