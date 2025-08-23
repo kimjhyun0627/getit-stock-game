@@ -36,7 +36,7 @@ async function bootstrap() {
   console.log('🌐 허용된 CORS 도메인:', corsOrigins);
 
   app.enableCors({
-    origin: corsOrigins,
+    origin: true, // 모든 origin 허용 (개발 중)
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
@@ -49,9 +49,23 @@ async function bootstrap() {
       'X-File-Name',
     ],
     exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
-    preflightContinue: false,
+    preflightContinue: true, // preflight 요청 계속 진행
     optionsSuccessStatus: 204,
     maxAge: 86400, // 24시간
+  });
+
+  // 추가 CORS 헤더 설정
+  app.use((req: any, res: any, next: any) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
   });
 
   // 전역 JWT Guard 설정 (Public 데코레이터가 있는 엔드포인트 제외)
