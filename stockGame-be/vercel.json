@@ -3,11 +3,11 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/api/index.ts"
+      "dest": "/src/index.ts"
     }
   ],
   "functions": {
-    "api/index.ts": {
+    "src/index.ts": {
       "maxDuration": 30
     }
   }
