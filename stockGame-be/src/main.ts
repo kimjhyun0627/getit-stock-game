@@ -69,7 +69,7 @@ async function bootstrap() {
         platform: process.platform,
         arch: process.arch,
       };
-      
+
       res.status(200).json(healthData);
     } catch (error) {
       console.error('헬스체크 에러:', error);
@@ -84,7 +84,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔌 포트: ${port}`);
-  
+
   await app.listen(port, '0.0.0.0'); // 모든 인터페이스에서 리스닝
 
   // 시드 데이터 삽입
