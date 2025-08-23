@@ -3,8 +3,7 @@
   "build": {
     "builder": "NIXPACKS",
     "buildCommand": "npm install && npm run build",
-    "sourcePath": "stockGame-be",
-    "nixpacksConfigPath": ".nixpacks"
+    "sourcePath": "stockGame-be"
   },
   "deploy": {
     "startCommand": "node dist/main",
