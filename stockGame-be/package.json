@@ -16,6 +16,8 @@
     "start:dev": "npx nest start --watch",
     "start:debug": "npx nest start --debug --watch",
     "start:prod": "node dist/main",
+    "vercel-build": "npm run build",
+    "vercel-dev": "npm run start:dev",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
