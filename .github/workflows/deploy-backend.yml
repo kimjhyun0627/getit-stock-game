@@ -1,17 +1,33 @@
 name: Deploy Backend to Railway
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
     branches: [main]
-    paths: ['stockGame-be/**', '.github/workflows/deploy-backend.yml']
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+    
+    - name: Check if backend files changed
+      id: changed-files
+      uses: tj-actions/changed-files@v44
+      with:
+        files: |
+          stockGame-be/**
+          .github/workflows/deploy-backend.yml
+    
+    - name: Skip deployment if no backend changes
+      if: steps.changed-files.outputs.any_changed != 'true'
+      run: |
+        echo "No backend files changed, skipping deployment"
+        exit 0
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
