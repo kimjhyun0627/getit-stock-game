@@ -6,7 +6,7 @@ const Login: React.FC = () => {
   const handleKakaoLogin = async () => {
     try {
       // 백엔드에서 카카오 OAuth URL을 받아옴
-      const response = await fetch('https://getit-stock-game.railway.app/api/auth/kakao/login');
+      const response = await fetch('https://getit-stock-game.vercel.app/api/auth/kakao/login');
       const { url } = await response.json();
       
       // 받은 URL로 리다이렉트

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://getit-stock-game.railway.app/api';
+const API_BASE_URL = 'https://getit-stock-game.vercel.app/api';
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('accessToken');

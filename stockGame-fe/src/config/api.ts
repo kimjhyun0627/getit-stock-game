@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'https://getit-stock-game.railway.app/api',
+  BASE_URL: 'https://getit-stock-game.vercel.app/api',
   TIMEOUT: 10000,
   ADMIN_ENDPOINTS: {
     DASHBOARD: '/admin/dashboard',

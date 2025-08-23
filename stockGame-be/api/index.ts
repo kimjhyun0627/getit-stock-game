@@ -28,18 +28,10 @@ async function bootstrap() {
     }),
   );
 
-  // 전역 JWT Guard 설정 (Public 데코레이터가 있는 엔드포인트 제외)
-  const jwtAuthGuard = app.get(JwtAuthGuard);
-  app.useGlobalGuards(jwtAuthGuard);
-
   // CORS 설정
   const corsOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',')
-    : [
-        'https://kimjhyun0627.github.io',
-        'https://getit-stock-game.vercel.app',
-        'https://getit-stock-game.railway.app',
-      ];
+    : ['https://kimjhyun0627.github.io', 'https://getit-stock-game.vercel.app'];
 
   console.log('🌐 허용된 CORS 도메인:', corsOrigins);
 
@@ -62,35 +54,9 @@ async function bootstrap() {
     maxAge: 86400, // 24시간
   });
 
-  // Railway의 기본 CORS 헤더를 강제로 덮어쓰기
-  app.use((req: any, res: any, next: any) => {
-    const origin = req.headers.origin;
-
-    // 허용된 origin인 경우에만 CORS 헤더 설정
-    if (corsOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-
-    // 다른 CORS 헤더들도 명시적으로 설정
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-    );
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, X-Requested-With, Origin, Accept, Cache-Control, X-File-Name',
-    );
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Max-Age', '86400');
-
-    // OPTIONS 요청 처리
-    if (req.method === 'OPTIONS') {
-      res.status(204).end();
-      return;
-    }
-
-    next();
-  });
+  // 전역 JWT Guard 설정 (Public 데코레이터가 있는 엔드포인트 제외)
+  const jwtAuthGuard = app.get(JwtAuthGuard);
+  app.useGlobalGuards(jwtAuthGuard);
 
   const port = process.env.PORT || 8081;
   console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
@@ -107,9 +73,8 @@ async function bootstrap() {
   }
 
   console.log(`🚀 주식게임 백엔드 서버가 포트 ${port}에서 실행 중입니다!`);
-  console.log(`💚 헬스체크: https://getit-stock-game.railway.app/health`);
-  console.log(`🌐 API 엔드포인트: https://getit-stock-game.railway.app/api`);
-  console.log(`🏠 루트 경로: https://getit-stock-game.railway.app/`);
-  console.log(`🌐 허용된 CORS 도메인: ${corsOrigins}`);
+  console.log(`🌐 API 엔드포인트: https://getit-stock-game.vercel.app/api`);
+  console.log(`🏠 루트 경로: https://getit-stock-game.vercel.app/`);
+  console.log(`🌐 허용된 CORS 도메인: ${corsOrigins.join(', ')}`);
 }
 bootstrap();
