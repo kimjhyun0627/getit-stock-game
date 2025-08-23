@@ -92,7 +92,7 @@ async function bootstrap() {
     next();
   });
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 8081;
   console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔌 포트: ${port}`);
 
