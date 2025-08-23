@@ -45,7 +45,7 @@ export class AuthController {
       const result = await this.authService.kakaoLogin(code);
 
       // 프론트엔드로 리다이렉트
-      const redirectUrl = `http://localhost:5173/auth/kakao/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      const redirectUrl = `https://kimjhyun0627.github.io/auth/kakao/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
 
       return res.redirect(redirectUrl);
     } catch (error) {
@@ -77,7 +77,7 @@ export class AuthController {
       const result = await this.authService.googleLogin(code);
 
       // 프론트엔드로 리다이렉트
-      const redirectUrl = `http://localhost:5173/auth/google/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      const redirectUrl = `https://kimjhyun0627.github.io/auth/google/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
 
       return res.redirect(redirectUrl);
     } catch (error) {
