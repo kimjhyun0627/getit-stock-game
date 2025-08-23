@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+
+[phases.install]
+cmds = ["npm ci --omit=dev"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "node dist/main"
+
+[variables]
+FRONTEND_URL = "https://kimjhyun0627.github.io"
+NODE_ENV = "production"

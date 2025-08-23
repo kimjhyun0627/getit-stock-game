@@ -36,8 +36,7 @@ async function bootstrap() {
   const allowedOrigins = [
     'https://kimjhyun0627.github.io',
     'https://getit-stock-game.vercel.app',
-    process.env.FRONTEND_URL,
-  ].filter(Boolean);
+  ];
 
   console.log('🌐 허용된 CORS 도메인:', allowedOrigins);
 

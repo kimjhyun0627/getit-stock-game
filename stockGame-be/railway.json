@@ -3,7 +3,8 @@
   "build": {
     "builder": "NIXPACKS",
     "buildCommand": "npm install && npm run build",
-    "sourcePath": "stockGame-be"
+    "sourcePath": "stockGame-be",
+    "nixpacksConfigPath": ".nixpacks"
   },
   "deploy": {
     "startCommand": "node dist/main",
@@ -15,7 +16,6 @@
     "numReplicas": 1
   },
   "variables": {
-    "NODE_ENV": "production",
-    "PORT": "3000"
+    "NODE_ENV": "production"
   }
 }
