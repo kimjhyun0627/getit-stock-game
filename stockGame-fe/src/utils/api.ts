@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('accessToken');
@@ -30,12 +30,12 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 
 export const apiGet = (endpoint: string) => apiFetch(endpoint);
 
-export const apiPost = (endpoint: string, data?: any) => apiFetch(endpoint, {
+export const apiPost = (endpoint: string, data?: unknown) => apiFetch(endpoint, {
   method: 'POST',
   body: data ? JSON.stringify(data) : undefined,
 });
 
-export const apiPut = (endpoint: string, data?: any) => apiFetch(endpoint, {
+export const apiPut = (endpoint: string, data?: unknown) => apiFetch(endpoint, {
   method: 'PUT',
   body: data ? JSON.stringify(data) : undefined,
 });

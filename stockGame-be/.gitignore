@@ -146,3 +146,15 @@ temp/
 
 # Local Netlify folder
 .netlify
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Admin files
+admin.html
+
+# Build outputs
+dist/
+build/
