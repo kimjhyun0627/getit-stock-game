@@ -56,17 +56,3 @@ jobs:
     
     - name: Build
       run: npm run build
-
-  deploy:
-    needs: [test-backend, test-frontend]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Deploy Backend
-      run: echo "Deploy backend to server"
-    
-    - name: Deploy Frontend
-      run: echo "Deploy frontend to hosting"

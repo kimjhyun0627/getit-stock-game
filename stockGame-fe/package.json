@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "homepage": "https://kimjhyun0627.github.io/getit-stock-game",
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
     "lucide-react": "^0.540.0",
