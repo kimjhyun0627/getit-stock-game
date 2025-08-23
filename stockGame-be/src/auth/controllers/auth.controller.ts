@@ -11,7 +11,7 @@ import { AuthService } from '../services/auth.service';
 import type { Request, Response } from 'express';
 import { Public } from '../decorators/public.decorator';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

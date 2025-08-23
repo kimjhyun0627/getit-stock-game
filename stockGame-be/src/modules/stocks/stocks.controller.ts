@@ -21,7 +21,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { Stock } from '../../common/entities/stock.entity';
 import { Public } from '../../auth/decorators/public.decorator';
 
-@Controller('stocks')
+@Controller('api/stocks')
 export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 

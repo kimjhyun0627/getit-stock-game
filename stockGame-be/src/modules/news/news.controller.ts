@@ -21,7 +21,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { News } from '../../common/entities/news.entity';
 import { Public } from '../../auth/decorators/public.decorator';
 
-@Controller('news')
+@Controller('api/news')
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
