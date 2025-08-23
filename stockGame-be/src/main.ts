@@ -33,16 +33,18 @@ async function bootstrap() {
   app.useGlobalGuards(jwtAuthGuard);
 
   // CORS 설정
-  const allowedOrigins = [
-    'https://kimjhyun0627.github.io',
-    'https://getit-stock-game.vercel.app',
-    'https://getit-stock-game.railway.app',
-  ];
+  const corsOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : [
+        'https://kimjhyun0627.github.io',
+        'https://getit-stock-game.vercel.app',
+        'https://getit-stock-game.railway.app',
+      ];
 
-  console.log('🌐 허용된 CORS 도메인:', allowedOrigins);
+  console.log('🌐 허용된 CORS 도메인:', corsOrigins);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [

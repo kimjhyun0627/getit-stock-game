@@ -15,6 +15,7 @@
     "numReplicas": 1
   },
   "variables": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "CORS_ORIGIN": "https://kimjhyun0627.github.io,https://getit-stock-game.vercel.app,https://getit-stock-game.railway.app"
   }
 }
