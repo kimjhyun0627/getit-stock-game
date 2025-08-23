@@ -46,8 +46,9 @@ jobs:
         cd stockGame-be
         npm run build
     
-    - name: Deploy to Railway
-      uses: bervProject/railway-deploy@v1.0.0
-      with:
-        railway_token: ${{ secrets.RAILWAY_TOKEN }}
-        service: backend
+    - name: Build for Railway
+      run: |
+        echo "🚀 Backend build completed successfully!"
+        echo "📦 Ready for Railway deployment"
+        echo "🔑 Please deploy manually using Railway CLI or dashboard"
+        echo "💡 Command: railway up --service backend"
