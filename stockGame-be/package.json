@@ -6,11 +6,11 @@
   "private": true,
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=9.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "scripts": {
-    "build": "npx nest build",
+    "build": "npx --yes nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "npx nest start",
     "start:dev": "npx nest start --watch",
