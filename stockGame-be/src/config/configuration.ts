@@ -1,5 +1,15 @@
 export default () => ({
   port: parseInt(process.env.PORT || '3000', 10),
+  cors: {
+    allowedOrigins: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:5173',
+      'https://kimjhyun0627.github.io',
+      'https://getit-stock-game.vercel.app',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
+  },
   database: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '1521', 10),

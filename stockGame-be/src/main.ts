@@ -33,9 +33,22 @@ async function bootstrap() {
   app.useGlobalGuards(jwtAuthGuard);
 
   // CORS 설정
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5173',
+    'https://kimjhyun0627.github.io',
+    'https://getit-stock-game.vercel.app',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean);
+
+  console.log('🌐 허용된 CORS 도메인:', allowedOrigins);
+
   app.enableCors({
-    origin: true,
+    origin: allowedOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   });
 
   const port = process.env.PORT || 3000;
