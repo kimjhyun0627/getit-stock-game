@@ -1,4 +1,4 @@
-name: Deploy Backend to Railway
+name: Deploy Backend to Vercel
 
 on:
   workflow_run:
@@ -46,9 +46,11 @@ jobs:
         cd stockGame-be
         npm run build
     
-    - name: Build for Railway
-      run: |
-        echo "🚀 Backend build completed successfully!"
-        echo "📦 Ready for Railway deployment"
-        echo "🔑 Please deploy manually using Railway CLI or dashboard"
-        echo "💡 Command: railway up --service backend"
+    - name: Deploy to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.ORG_ID }}
+        vercel-project-id: ${{ secrets.PROJECT_ID }}
+        working-directory: ./stockGame-be
+        vercel-args: '--prod'

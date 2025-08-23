@@ -8,8 +8,6 @@
     "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
     "test": "vitest --environment jsdom",
     "test:watch": "vitest --watch --environment jsdom",
     "test:coverage": "vitest --coverage --environment jsdom",

@@ -3,16 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main, develop]
-    paths: 
-      - 'stockGame-be/**'
-      - 'stockGame-fe/**'
-      - '.github/workflows/ci.yml'
   pull_request:
     branches: [main]
-    paths: 
-      - 'stockGame-be/**'
-      - 'stockGame-fe/**'
-      - '.github/workflows/ci.yml'
 
 jobs:
   test-backend:
