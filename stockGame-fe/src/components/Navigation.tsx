@@ -124,7 +124,7 @@ const Navigation: React.FC<NavigationProps> = ({ isLoggedIn, setIsLoggedIn }) =>
             {/* 로고 - 반응형으로 조정 */}
             <div className="flex items-center space-x-2 py-4 flex-shrink-0">
               <img 
-                src="/src/assets/Logo.png" 
+                src="/Logo.png" 
                 alt="STOCK IT Logo" 
                 className="h-8 w-8 md:h-10 md:w-10"
               />
