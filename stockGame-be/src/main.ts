@@ -62,6 +62,36 @@ async function bootstrap() {
     maxAge: 86400, // 24시간
   });
 
+  // Railway의 기본 CORS 헤더를 강제로 덮어쓰기
+  app.use((req: any, res: any, next: any) => {
+    const origin = req.headers.origin;
+
+    // 허용된 origin인 경우에만 CORS 헤더 설정
+    if (corsOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+
+    // 다른 CORS 헤더들도 명시적으로 설정
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+    );
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With, Origin, Accept, Cache-Control, X-File-Name',
+    );
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Max-Age', '86400');
+
+    // OPTIONS 요청 처리
+    if (req.method === 'OPTIONS') {
+      res.status(204).end();
+      return;
+    }
+
+    next();
+  });
+
   // 글로벌 접두사 설정 (헬스체크 경로 제외) - CORS 설정 직후에 설정
   app.setGlobalPrefix('api', {
     exclude: ['/', '/health', '/hello'],

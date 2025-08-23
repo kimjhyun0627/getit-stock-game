@@ -29,6 +29,7 @@ export class NewsController {
   @Public()
   @Get()
   async findAll(): Promise<NewsResponseDto[]> {
+    console.log('findAll');
     return await this.newsService.findAll();
   }
 
