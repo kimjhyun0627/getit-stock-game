@@ -31,6 +31,12 @@ FRONTEND_URL=https://your-frontend-domain.com
 BACKEND_URL=https://your-backend-domain.com
 KAKAO_REDIRECT_URI=https://your-backend-domain.com/api/auth/kakao/callback
 GOOGLE_REDIRECT_URI=https://your-backend-domain.com/api/auth/google/callback
+
+# 실제 배포 예시 (stockgame-be.get-it.cloud)
+# FRONTEND_URL=https://your-frontend-domain.com
+# BACKEND_URL=https://stockgame-be.get-it.cloud
+# KAKAO_REDIRECT_URI=https://stockgame-be.get-it.cloud/api/auth/kakao/callback
+# GOOGLE_REDIRECT_URI=https://stockgame-be.get-it.cloud/api/auth/google/callback
 ```
 
 #### 프론트엔드 (`.env`)
