@@ -68,7 +68,7 @@ const Login: React.FC = () => {
             </div>
           </div>
           
-          <GoogleLogin onLogin={() => {}} />
+          <GoogleLogin />
           
           <div className="text-center">
             <Link to="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200 hover:scale-105">
