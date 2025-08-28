@@ -3,12 +3,14 @@ import { AppModule } from './app.module';
 import { ValidationPipe, BadRequestException, Logger } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { SeedService } from './seed/seed.service';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   logger.log('🚀 NestJS 주식게임 백엔드 서버를 시작합니다...');
 
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
   logger.log('✅ NestJS 애플리케이션이 생성되었습니다.');
 
   // 글로벌 파이프 설정
@@ -42,8 +44,11 @@ async function bootstrap() {
 
   // CORS 설정
   logger.log('🌐 CORS를 설정합니다...');
+  const frontendUrl = configService.get<string>('urls.frontend');
+  const corsOrigins = frontendUrl ? [frontendUrl] : true;
+
   app.enableCors({
-    origin: true,
+    origin: corsOrigins,
     credentials: true,
   });
   logger.log('✅ CORS 설정이 완료되었습니다.');
@@ -64,7 +69,9 @@ async function bootstrap() {
     await seedService.seedAll();
     logger.log('✅ 시드 데이터 삽입이 완료되었습니다.');
   } catch (error) {
-    logger.error('❌ 시드 데이터 삽입 중 오류 발생:', error.message);
+    const errorMessage =
+      error instanceof Error ? error.message : '알 수 없는 오류';
+    logger.error('❌ 시드 데이터 삽입 중 오류 발생:', errorMessage);
   }
 
   logger.log(`🎉 주식게임 백엔드 서버가 포트 ${port}에서 실행 중입니다!`);

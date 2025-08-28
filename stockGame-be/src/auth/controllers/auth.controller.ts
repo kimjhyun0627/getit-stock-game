@@ -10,10 +10,14 @@ import {
 import { AuthService } from '../services/auth.service';
 import type { Request, Response } from 'express';
 import { Public } from '../decorators/public.decorator';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Public()
   @Get('kakao/login')
@@ -45,7 +49,23 @@ export class AuthController {
       const result = await this.authService.kakaoLogin(code);
 
       // 프론트엔드로 리다이렉트
-      const redirectUrl = `http://localhost:5173/auth/kakao/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      const frontendUrl = this.configService.get<string>('urls.frontend');
+      console.log('🔍 Kakao 콜백 - frontendUrl:', frontendUrl);
+      console.log(
+        '🔍 Kakao 콜백 - 환경변수 FRONTEND_URL:',
+        process.env.FRONTEND_URL,
+      );
+
+      if (!frontendUrl) {
+        console.error(
+          '❌ frontendUrl이 설정되지 않았습니다. 기본값을 사용합니다.',
+        );
+        const defaultFrontendUrl = 'http://localhost:5173';
+        const redirectUrl = `${defaultFrontendUrl}/auth/kakao/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+        return res.redirect(redirectUrl);
+      }
+
+      const redirectUrl = `${frontendUrl}/auth/kakao/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
 
       return res.redirect(redirectUrl);
     } catch (error) {
@@ -77,7 +97,23 @@ export class AuthController {
       const result = await this.authService.googleLogin(code);
 
       // 프론트엔드로 리다이렉트
-      const redirectUrl = `http://localhost:5173/auth/google/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      const frontendUrl = this.configService.get<string>('urls.frontend');
+      console.log('🔍 Google 콜백 - frontendUrl:', frontendUrl);
+      console.log(
+        '🔍 Google 콜백 - 환경변수 FRONTEND_URL:',
+        process.env.FRONTEND_URL,
+      );
+
+      if (!frontendUrl) {
+        console.error(
+          '❌ frontendUrl이 설정되지 않았습니다. 기본값을 사용합니다.',
+        );
+        const defaultFrontendUrl = 'http://localhost:5173';
+        const redirectUrl = `${defaultFrontendUrl}/auth/google/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+        return res.redirect(redirectUrl);
+      }
+
+      const redirectUrl = `${frontendUrl}/auth/google/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
 
       return res.redirect(redirectUrl);
     } catch (error) {

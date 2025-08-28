@@ -19,4 +19,8 @@ export default () => ({
       process.env.KAKAO_REDIRECT_URI ||
       'http://localhost:3000/api/auth/kakao/callback',
   },
+  urls: {
+    frontend: process.env.FRONTEND_URL || 'http://localhost:5173',
+    backend: process.env.BACKEND_URL || 'http://localhost:3000',
+  },
 });

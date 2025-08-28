@@ -1,372 +1,519 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GETIT 주식게임 관리자 페이지</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3B82F6',
-                        success: '#10B981',
-                        warning: '#F59E0B',
-                        danger: '#EF4444'
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#3B82F6',
+              success: '#10B981',
+              warning: '#F59E0B',
+              danger: '#EF4444',
+            },
+          },
+        },
+      };
     </script>
-</head>
-<body class="bg-gray-50">
+  </head>
+  <body class="bg-gray-50">
     <div class="min-h-screen">
-        <!-- 헤더 -->
-        <header class="bg-white shadow-sm border-b">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-6">
-                    <div class="flex items-center">
-                        <h1 class="text-2xl font-bold text-gray-900">📊 GETIT 주식게임 관리자</h1>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <label class="text-sm font-medium text-gray-700">관리자 비밀번호:</label>
-                            <input type="password" id="adminPassword" value="admin123" 
-                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-                        <button onclick="testConnection()" 
-                                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors">
-                            연결 테스트
-                        </button>
-                    </div>
-                </div>
+      <!-- 헤더 -->
+      <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center py-6">
+            <div class="flex items-center">
+              <h1 class="text-2xl font-bold text-gray-900">
+                📊 GETIT 주식게임 관리자
+              </h1>
             </div>
-        </header>
-
-        <!-- 메인 컨텐츠 -->
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <!-- 대시보드 카드 -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-lg">📈</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">총 주식 종목</dt>
-                                    <dd id="totalStocks" class="text-lg font-medium text-gray-900">-</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-lg">📰</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">총 뉴스</dt>
-                                    <dd id="totalNews" class="text-lg font-medium text-gray-900">-</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-lg">🚀</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">상승 종목</dt>
-                                    <dd id="risingStocks" class="text-lg font-medium text-gray-900">-</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
-                                    <span class="text-white text-lg">📉</span>
-                                </div>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">하락 종목</dt>
-                                    <dd id="fallingStocks" class="text-lg font-medium text-gray-900">-</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="flex items-center space-x-4">
+              <div class="flex items-center space-x-2">
+                <label class="text-sm font-medium text-gray-700"
+                  >관리자 비밀번호:</label
+                >
+                <input
+                  type="password"
+                  id="adminPassword"
+                  value="admin123"
+                  class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <button
+                onclick="testConnection()"
+                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                연결 테스트
+              </button>
             </div>
+          </div>
+        </div>
+      </header>
 
-            <!-- 탭 네비게이션 -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8 px-6">
-                        <button onclick="showTab('stocks')" id="stocksTab" 
-                                class="tab-button py-4 px-1 border-b-2 border-primary text-sm font-medium text-primary">
-                            주식 관리
-                        </button>
-                        <button onclick="showTab('news')" id="newsTab" 
-                                class="tab-button py-4 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            뉴스 관리
-                        </button>
-                        <button onclick="showTab('admin')" id="adminTab" 
-                                class="tab-button py-4 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            관리 도구
-                        </button>
-                    </nav>
+      <!-- 메인 컨텐츠 -->
+      <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- 대시보드 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center"
+                  >
+                    <span class="text-white text-lg">📈</span>
+                  </div>
                 </div>
-
-                <!-- 주식 관리 탭 -->
-                <div id="stocksContent" class="tab-content p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-medium text-gray-900">주식 종목 관리</h3>
-                        <button onclick="showCreateStockModal()" 
-                                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors">
-                            새 주식 추가
-                        </button>
-                    </div>
-                    <div id="stocksList" class="space-y-4">
-                        <!-- 주식 목록이 여기에 로드됩니다 -->
-                    </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">
+                      총 주식 종목
+                    </dt>
+                    <dd
+                      id="totalStocks"
+                      class="text-lg font-medium text-gray-900"
+                    >
+                      -
+                    </dd>
+                  </dl>
                 </div>
-
-                <!-- 뉴스 관리 탭 -->
-                <div id="newsContent" class="tab-content hidden p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-medium text-gray-900">뉴스 관리</h3>
-                        <button onclick="showCreateNewsModal()" 
-                                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors">
-                            새 뉴스 추가
-                        </button>
-                    </div>
-                    <div id="newsList" class="space-y-4">
-                        <!-- 뉴스 목록이 여기에 로드됩니다 -->
-                    </div>
-                </div>
-
-                <!-- 관리 도구 탭 -->
-                <div id="adminContent" class="tab-content hidden p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-6">관리 도구</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-6 rounded-lg">
-                            <h4 class="text-md font-medium text-gray-900 mb-4">주식 가격 시뮬레이션</h4>
-                            <p class="text-sm text-gray-600 mb-4">모든 주식의 가격을 랜덤하게 변경합니다.</p>
-                            <button onclick="runStockSimulation()" 
-                                    class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors">
-                                시뮬레이션 실행
-                            </button>
-                        </div>
-                        <div class="bg-gray-50 p-6 rounded-lg">
-                            <h4 class="text-md font-medium text-gray-900 mb-4">데이터 백업</h4>
-                            <p class="text-sm text-gray-600 mb-4">현재 데이터 상태를 백업합니다.</p>
-                            <button onclick="backupData()" 
-                                    class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                백업 실행
-                            </button>
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
-        </main>
+          </div>
+
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center"
+                  >
+                    <span class="text-white text-lg">📰</span>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">
+                      총 뉴스
+                    </dt>
+                    <dd
+                      id="totalNews"
+                      class="text-lg font-medium text-gray-900"
+                    >
+                      -
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center"
+                  >
+                    <span class="text-white text-lg">🚀</span>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">
+                      상승 종목
+                    </dt>
+                    <dd
+                      id="risingStocks"
+                      class="text-lg font-medium text-gray-900"
+                    >
+                      -
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div
+                    class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center"
+                  >
+                    <span class="text-white text-lg">📉</span>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">
+                      하락 종목
+                    </dt>
+                    <dd
+                      id="fallingStocks"
+                      class="text-lg font-medium text-gray-900"
+                    >
+                      -
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="bg-white shadow rounded-lg">
+          <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8 px-6">
+              <button
+                onclick="showTab('stocks')"
+                id="stocksTab"
+                class="tab-button py-4 px-1 border-b-2 border-primary text-sm font-medium text-primary"
+              >
+                주식 관리
+              </button>
+              <button
+                onclick="showTab('news')"
+                id="newsTab"
+                class="tab-button py-4 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                뉴스 관리
+              </button>
+              <button
+                onclick="showTab('admin')"
+                id="adminTab"
+                class="tab-button py-4 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              >
+                관리 도구
+              </button>
+            </nav>
+          </div>
+
+          <!-- 주식 관리 탭 -->
+          <div id="stocksContent" class="tab-content p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-lg font-medium text-gray-900">주식 종목 관리</h3>
+              <button
+                onclick="showCreateStockModal()"
+                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                새 주식 추가
+              </button>
+            </div>
+            <div id="stocksList" class="space-y-4">
+              <!-- 주식 목록이 여기에 로드됩니다 -->
+            </div>
+          </div>
+
+          <!-- 뉴스 관리 탭 -->
+          <div id="newsContent" class="tab-content hidden p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-lg font-medium text-gray-900">뉴스 관리</h3>
+              <button
+                onclick="showCreateNewsModal()"
+                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                새 뉴스 추가
+              </button>
+            </div>
+            <div id="newsList" class="space-y-4">
+              <!-- 뉴스 목록이 여기에 로드됩니다 -->
+            </div>
+          </div>
+
+          <!-- 관리 도구 탭 -->
+          <div id="adminContent" class="tab-content hidden p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-6">관리 도구</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-gray-50 p-6 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">
+                  주식 가격 시뮬레이션
+                </h4>
+                <p class="text-sm text-gray-600 mb-4">
+                  모든 주식의 가격을 랜덤하게 변경합니다.
+                </p>
+                <button
+                  onclick="runStockSimulation()"
+                  class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
+                >
+                  시뮬레이션 실행
+                </button>
+              </div>
+              <div class="bg-gray-50 p-6 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">
+                  데이터 백업
+                </h4>
+                <p class="text-sm text-gray-600 mb-4">
+                  현재 데이터 상태를 백업합니다.
+                </p>
+                <button
+                  onclick="backupData()"
+                  class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                >
+                  백업 실행
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
 
     <!-- 모달들 -->
-    <div id="createStockModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen">
-            <div class="bg-white rounded-lg p-6 w-full max-w-md">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">새 주식 추가</h3>
-                <form id="createStockForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">주식명</label>
-                        <input type="text" name="name" required 
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">심볼</label>
-                        <input type="text" name="symbol" required 
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">현재가</label>
-                        <input type="number" name="currentPrice" required min="0" 
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">거래량</label>
-                        <input type="number" name="volume" required min="0" 
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="hideCreateStockModal()" 
-                                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
-                            취소
-                        </button>
-                        <button type="submit" 
-                                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700">
-                            추가
-                        </button>
-                    </div>
-                </form>
+    <div
+      id="createStockModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50"
+    >
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">새 주식 추가</h3>
+          <form id="createStockForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >주식명</label
+              >
+              <input
+                type="text"
+                name="name"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >심볼</label
+              >
+              <input
+                type="text"
+                name="symbol"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >현재가</label
+              >
+              <input
+                type="number"
+                name="currentPrice"
+                required
+                min="0"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >거래량</label
+              >
+              <input
+                type="number"
+                name="volume"
+                required
+                min="0"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                type="button"
+                onclick="hideCreateStockModal()"
+                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
+              >
+                추가
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
 
-    <div id="createNewsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen">
-            <div class="bg-white rounded-lg p-6 w-full max-w-md">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">새 뉴스 추가</h3>
-                <form id="createNewsForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">제목</label>
-                        <input type="text" name="title" required 
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">요약</label>
-                        <textarea name="summary" required rows="2" 
-                                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">내용</label>
-                        <textarea name="content" required rows="4" 
-                                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">카테고리</label>
-                        <select name="category" required 
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="economy">경제</option>
-                            <option value="technology">기술</option>
-                            <option value="politics">정치</option>
-                            <option value="sports">스포츠</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="hideCreateNewsModal()" 
-                                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
-                            취소
-                        </button>
-                        <button type="submit" 
-                                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700">
-                            추가
-                        </button>
-                    </div>
-                </form>
+    <div
+      id="createNewsModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50"
+    >
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">새 뉴스 추가</h3>
+          <form id="createNewsForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >제목</label
+              >
+              <input
+                type="text"
+                name="title"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >요약</label
+              >
+              <textarea
+                name="summary"
+                required
+                rows="2"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              ></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >내용</label
+              >
+              <textarea
+                name="content"
+                required
+                rows="4"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              ></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >카테고리</label
+              >
+              <select
+                name="category"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="economy">경제</option>
+                <option value="technology">기술</option>
+                <option value="politics">정치</option>
+                <option value="sports">스포츠</option>
+              </select>
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                type="button"
+                onclick="hideCreateNewsModal()"
+                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
+              >
+                추가
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:3000/api';
-        let adminPassword = 'admin123';
+      const API_BASE = window.location.origin + '/api';
+      let adminPassword = 'admin123';
 
-        // 페이지 로드 시 초기화
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDashboard();
-            loadStocks();
-            loadNews();
-            
-            // 비밀번호 입력 필드 이벤트
-            document.getElementById('adminPassword').addEventListener('change', function(e) {
-                adminPassword = e.target.value;
-            });
+      // 페이지 로드 시 초기화
+      document.addEventListener('DOMContentLoaded', function () {
+        loadDashboard();
+        loadStocks();
+        loadNews();
+
+        // 비밀번호 입력 필드 이벤트
+        document
+          .getElementById('adminPassword')
+          .addEventListener('change', function (e) {
+            adminPassword = e.target.value;
+          });
+      });
+
+      // 탭 전환
+      function showTab(tabName) {
+        // 모든 탭 버튼 비활성화
+        document.querySelectorAll('.tab-button').forEach((btn) => {
+          btn.classList.remove('border-primary', 'text-primary');
+          btn.classList.add('border-transparent', 'text-gray-500');
         });
 
-        // 탭 전환
-        function showTab(tabName) {
-            // 모든 탭 버튼 비활성화
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('border-primary', 'text-primary');
-                btn.classList.add('border-transparent', 'text-gray-500');
-            });
-            
-            // 모든 탭 컨텐츠 숨기기
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            // 선택된 탭 활성화
-            document.getElementById(tabName + 'Tab').classList.remove('border-transparent', 'text-gray-500');
-            document.getElementById(tabName + 'Tab').classList.add('border-primary', 'text-primary');
-            document.getElementById(tabName + 'Content').classList.remove('hidden');
-        }
+        // 모든 탭 컨텐츠 숨기기
+        document.querySelectorAll('.tab-content').forEach((content) => {
+          content.classList.add('hidden');
+        });
 
-        // 연결 테스트
-        async function testConnection() {
-            try {
-                const response = await fetch(`${API_BASE}/stocks`);
-                if (response.ok) {
-                    alert('✅ 서버 연결 성공!');
-                } else {
-                    alert('❌ 서버 연결 실패');
-                }
-            } catch (error) {
-                alert('❌ 서버 연결 실패: ' + error.message);
-            }
-        }
+        // 선택된 탭 활성화
+        document
+          .getElementById(tabName + 'Tab')
+          .classList.remove('border-transparent', 'text-gray-500');
+        document
+          .getElementById(tabName + 'Tab')
+          .classList.add('border-primary', 'text-primary');
+        document.getElementById(tabName + 'Content').classList.remove('hidden');
+      }
 
-        // 대시보드 로드
-        async function loadDashboard() {
-            try {
-                const response = await fetch(`${API_BASE}/admin/dashboard`, {
-                    headers: {
-                        'x-admin-password': adminPassword
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('totalStocks').textContent = data.stocks.total;
-                    document.getElementById('totalNews').textContent = data.news.total;
-                    document.getElementById('risingStocks').textContent = data.stocks.rising;
-                    document.getElementById('fallingStocks').textContent = data.stocks.falling;
-                }
-            } catch (error) {
-                console.error('대시보드 로드 실패:', error);
-            }
+      // 연결 테스트
+      async function testConnection() {
+        try {
+          const response = await fetch(`${API_BASE}/stocks`);
+          if (response.ok) {
+            alert('✅ 서버 연결 성공!');
+          } else {
+            alert('❌ 서버 연결 실패');
+          }
+        } catch (error) {
+          alert('❌ 서버 연결 실패: ' + error.message);
         }
+      }
 
-        // 주식 목록 로드
-        async function loadStocks() {
-            try {
-                const response = await fetch(`${API_BASE}/stocks`);
-                if (response.ok) {
-                    const stocks = await response.json();
-                    displayStocks(stocks);
-                }
-            } catch (error) {
-                console.error('주식 로드 실패:', error);
-            }
+      // 대시보드 로드
+      async function loadDashboard() {
+        try {
+          const response = await fetch(`${API_BASE}/admin/dashboard`, {
+            headers: {
+              'x-admin-password': adminPassword,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById('totalStocks').textContent =
+              data.stocks.total;
+            document.getElementById('totalNews').textContent = data.news.total;
+            document.getElementById('risingStocks').textContent =
+              data.stocks.rising;
+            document.getElementById('fallingStocks').textContent =
+              data.stocks.falling;
+          }
+        } catch (error) {
+          console.error('대시보드 로드 실패:', error);
         }
+      }
 
-        // 주식 표시
-        function displayStocks(stocks) {
-            const container = document.getElementById('stocksList');
-            container.innerHTML = stocks.map(stock => `
+      // 주식 목록 로드
+      async function loadStocks() {
+        try {
+          const response = await fetch(`${API_BASE}/stocks`);
+          if (response.ok) {
+            const stocks = await response.json();
+            displayStocks(stocks);
+          }
+        } catch (error) {
+          console.error('주식 로드 실패:', error);
+        }
+      }
+
+      // 주식 표시
+      function displayStocks(stocks) {
+        const container = document.getElementById('stocksList');
+        container.innerHTML = stocks
+          .map(
+            (stock) => `
                 <div class="bg-white border rounded-lg p-4 shadow-sm">
                     <div class="flex justify-between items-center">
                         <div>
@@ -392,26 +539,30 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
-        }
+            `,
+          )
+          .join('');
+      }
 
-        // 뉴스 목록 로드
-        async function loadNews() {
-            try {
-                const response = await fetch(`${API_BASE}/news`);
-                if (response.ok) {
-                    const news = await response.json();
-                    displayNews(news);
-                }
-            } catch (error) {
-                console.error('뉴스 로드 실패:', error);
-            }
+      // 뉴스 목록 로드
+      async function loadNews() {
+        try {
+          const response = await fetch(`${API_BASE}/news`);
+          if (response.ok) {
+            const news = await response.json();
+            displayNews(news);
+          }
+        } catch (error) {
+          console.error('뉴스 로드 실패:', error);
         }
+      }
 
-        // 뉴스 표시
-        function displayNews(news) {
-            const container = document.getElementById('newsList');
-            container.innerHTML = news.map(item => `
+      // 뉴스 표시
+      function displayNews(news) {
+        const container = document.getElementById('newsList');
+        container.innerHTML = news
+          .map(
+            (item) => `
                 <div class="bg-white border rounded-lg p-4 shadow-sm">
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
@@ -436,224 +587,234 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
-        }
+            `,
+          )
+          .join('');
+      }
 
-        // 카테고리 이름 변환
-        function getCategoryName(category) {
-            const categories = {
-                'economy': '경제',
-                'technology': '기술',
-                'politics': '정치',
-                'sports': '스포츠'
-            };
-            return categories[category] || category;
-        }
+      // 카테고리 이름 변환
+      function getCategoryName(category) {
+        const categories = {
+          economy: '경제',
+          technology: '기술',
+          politics: '정치',
+          sports: '스포츠',
+        };
+        return categories[category] || category;
+      }
 
-        // 주식 생성 모달 표시/숨김
-        function showCreateStockModal() {
-            document.getElementById('createStockModal').classList.remove('hidden');
-        }
+      // 주식 생성 모달 표시/숨김
+      function showCreateStockModal() {
+        document.getElementById('createStockModal').classList.remove('hidden');
+      }
 
-        function hideCreateStockModal() {
-            document.getElementById('createStockModal').classList.add('hidden');
-            document.getElementById('createStockForm').reset();
-        }
+      function hideCreateStockModal() {
+        document.getElementById('createStockModal').classList.add('hidden');
+        document.getElementById('createStockForm').reset();
+      }
 
-        // 뉴스 생성 모달 표시/숨김
-        function showCreateNewsModal() {
-            document.getElementById('createNewsModal').classList.remove('hidden');
-        }
+      // 뉴스 생성 모달 표시/숨김
+      function showCreateNewsModal() {
+        document.getElementById('createNewsModal').classList.remove('hidden');
+      }
 
-        function hideCreateNewsModal() {
-            document.getElementById('createNewsModal').classList.add('hidden');
-            document.getElementById('createNewsForm').reset();
-        }
+      function hideCreateNewsModal() {
+        document.getElementById('createNewsModal').classList.add('hidden');
+        document.getElementById('createNewsForm').reset();
+      }
 
-        // 주식 생성 폼 제출
-        document.getElementById('createStockForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const stockData = {
-                name: formData.get('name'),
-                symbol: formData.get('symbol'),
-                currentPrice: parseInt(formData.get('currentPrice')),
-                volume: parseInt(formData.get('volume'))
-            };
+      // 주식 생성 폼 제출
+      document
+        .getElementById('createStockForm')
+        .addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const stockData = {
+            name: formData.get('name'),
+            symbol: formData.get('symbol'),
+            currentPrice: parseInt(formData.get('currentPrice')),
+            volume: parseInt(formData.get('volume')),
+          };
 
-            try {
-                const response = await fetch(`${API_BASE}/stocks`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-password': adminPassword
-                    },
-                    body: JSON.stringify(stockData)
-                });
+          try {
+            const response = await fetch(`${API_BASE}/stocks`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-admin-password': adminPassword,
+              },
+              body: JSON.stringify(stockData),
+            });
 
-                if (response.ok) {
-                    alert('주식이 성공적으로 추가되었습니다!');
-                    hideCreateStockModal();
-                    loadStocks();
-                    loadDashboard();
-                } else {
-                    alert('주식 추가 실패');
-                }
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
+            if (response.ok) {
+              alert('주식이 성공적으로 추가되었습니다!');
+              hideCreateStockModal();
+              loadStocks();
+              loadDashboard();
+            } else {
+              alert('주식 추가 실패');
             }
+          } catch (error) {
+            alert('오류 발생: ' + error.message);
+          }
         });
 
-        // 뉴스 생성 폼 제출
-        document.getElementById('createNewsForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const newsData = {
-                title: formData.get('title'),
-                summary: formData.get('summary'),
-                content: formData.get('content'),
-                category: formData.get('category')
-            };
+      // 뉴스 생성 폼 제출
+      document
+        .getElementById('createNewsForm')
+        .addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const newsData = {
+            title: formData.get('title'),
+            summary: formData.get('summary'),
+            content: formData.get('content'),
+            category: formData.get('category'),
+          };
 
-            try {
-                const response = await fetch(`${API_BASE}/news`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-password': adminPassword
-                    },
-                    body: JSON.stringify(newsData)
-                });
+          try {
+            const response = await fetch(`${API_BASE}/news`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-admin-password': adminPassword,
+              },
+              body: JSON.stringify(newsData),
+            });
 
-                if (response.ok) {
-                    alert('뉴스가 성공적으로 추가되었습니다!');
-                    hideCreateNewsModal();
-                    loadNews();
-                    loadDashboard();
-                } else {
-                    alert('뉴스 추가 실패');
-                }
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
+            if (response.ok) {
+              alert('뉴스가 성공적으로 추가되었습니다!');
+              hideCreateNewsModal();
+              loadNews();
+              loadDashboard();
+            } else {
+              alert('뉴스 추가 실패');
             }
+          } catch (error) {
+            alert('오류 발생: ' + error.message);
+          }
         });
 
-        // 주식 삭제
-        async function deleteStock(id) {
-            if (!confirm('정말로 이 주식을 삭제하시겠습니까?')) return;
+      // 주식 삭제
+      async function deleteStock(id) {
+        if (!confirm('정말로 이 주식을 삭제하시겠습니까?')) return;
 
-            try {
-                const response = await fetch(`${API_BASE}/stocks/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'x-admin-password': adminPassword
-                    }
-                });
+        try {
+          const response = await fetch(`${API_BASE}/stocks/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'x-admin-password': adminPassword,
+            },
+          });
 
-                if (response.ok) {
-                    alert('주식이 삭제되었습니다!');
-                    loadStocks();
-                    loadDashboard();
-                } else {
-                    alert('주식 삭제 실패');
-                }
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
-            }
+          if (response.ok) {
+            alert('주식이 삭제되었습니다!');
+            loadStocks();
+            loadDashboard();
+          } else {
+            alert('주식 삭제 실패');
+          }
+        } catch (error) {
+          alert('오류 발생: ' + error.message);
         }
+      }
 
-        // 뉴스 삭제
-        async function deleteNews(id) {
-            if (!confirm('정말로 이 뉴스를 삭제하시겠습니까?')) return;
+      // 뉴스 삭제
+      async function deleteNews(id) {
+        if (!confirm('정말로 이 뉴스를 삭제하시겠습니까?')) return;
 
-            try {
-                const response = await fetch(`${API_BASE}/news/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'x-admin-password': adminPassword
-                    }
-                });
+        try {
+          const response = await fetch(`${API_BASE}/news/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'x-admin-password': adminPassword,
+            },
+          });
 
-                if (response.ok) {
-                    alert('뉴스가 삭제되었습니다!');
-                    loadNews();
-                    loadDashboard();
-                } else {
-                    alert('뉴스 삭제 실패');
-                }
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
-            }
+          if (response.ok) {
+            alert('뉴스가 삭제되었습니다!');
+            loadNews();
+            loadDashboard();
+          } else {
+            alert('뉴스 삭제 실패');
+          }
+        } catch (error) {
+          alert('오류 발생: ' + error.message);
         }
+      }
 
-        // 뉴스 발행 상태 토글
-        async function toggleNewsPublish(id, isPublished) {
-            try {
-                const response = await fetch(`${API_BASE}/news/${id}/publish`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-password': adminPassword
-                    },
-                    body: JSON.stringify({ isPublished })
-                });
+      // 뉴스 발행 상태 토글
+      async function toggleNewsPublish(id, isPublished) {
+        try {
+          const response = await fetch(`${API_BASE}/news/${id}/publish`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-password': adminPassword,
+            },
+            body: JSON.stringify({ isPublished }),
+          });
 
-                if (response.ok) {
-                    alert(`뉴스가 ${isPublished ? '발행' : '미발행'} 상태로 변경되었습니다!`);
-                    loadNews();
-                    loadDashboard();
-                } else {
-                    alert('상태 변경 실패');
-                }
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
-            }
+          if (response.ok) {
+            alert(
+              `뉴스가 ${isPublished ? '발행' : '미발행'} 상태로 변경되었습니다!`,
+            );
+            loadNews();
+            loadDashboard();
+          } else {
+            alert('상태 변경 실패');
+          }
+        } catch (error) {
+          alert('오류 발생: ' + error.message);
         }
+      }
 
-        // 주식 가격 시뮬레이션
-        async function runStockSimulation() {
-            if (!confirm('주식 가격 시뮬레이션을 실행하시겠습니까?')) return;
+      // 주식 가격 시뮬레이션
+      async function runStockSimulation() {
+        if (!confirm('주식 가격 시뮬레이션을 실행하시겠습니까?')) return;
 
-            try {
-                const response = await fetch(`${API_BASE}/stocks/simulate`, {
-                    method: 'POST',
-                    headers: {
-                        'x-admin-password': adminPassword
-                    }
-                });
+        try {
+          const response = await fetch(`${API_BASE}/stocks/simulate`, {
+            method: 'POST',
+            headers: {
+              'x-admin-password': adminPassword,
+            },
+          });
 
-                if (response.ok) {
-                    alert('시뮬레이션이 실행되었습니다!');
-                    loadStocks();
-                    loadDashboard();
-                } else {
-                    alert('시뮬레이션 실행 실패');
-                }
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
-            }
+          if (response.ok) {
+            alert('시뮬레이션이 실행되었습니다!');
+            loadStocks();
+            loadDashboard();
+          } else {
+            alert('시뮬레이션 실행 실패');
+          }
+        } catch (error) {
+          alert('오류 발생: ' + error.message);
         }
+      }
 
-        // 데이터 백업
-        async function backupData() {
-            try {
-                const response = await fetch(`${API_BASE}/admin/backup`, {
-                    method: 'POST',
-                    headers: {
-                        'x-admin-password': adminPassword
-                    }
-                });
+      // 데이터 백업
+      async function backupData() {
+        try {
+          const response = await fetch(`${API_BASE}/admin/backup`, {
+            method: 'POST',
+            headers: {
+              'x-admin-password': adminPassword,
+            },
+          });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    alert(`백업이 완료되었습니다!\n주식: ${data.stocksCount}개\n뉴스: ${data.newsCount}개`);
-                } else {
-                    alert('백업 실패');
-                }
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
-            }
+          if (response.ok) {
+            const data = await response.json();
+            alert(
+              `백업이 완료되었습니다!\n주식: ${data.stocksCount}개\n뉴스: ${data.newsCount}개`,
+            );
+          } else {
+            alert('백업 실패');
+          }
+        } catch (error) {
+          alert('오류 발생: ' + error.message);
         }
+      }
     </script>
-</body>
+  </body>
 </html>

@@ -25,15 +25,36 @@ KAKAO_CLIENT_ID=your_kakao_client_id
 KAKAO_CLIENT_SECRET=your_kakao_client_secret
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# 배포용 URL 설정 (중요!)
+FRONTEND_URL=https://your-frontend-domain.com
+BACKEND_URL=https://your-backend-domain.com
+KAKAO_REDIRECT_URI=https://your-backend-domain.com/api/auth/kakao/callback
+GOOGLE_REDIRECT_URI=https://your-backend-domain.com/api/auth/google/callback
 ```
 
 #### 프론트엔드 (`.env`)
 ```bash
 # Frontend/.env
-VITE_API_URL=https://your-backend-domain.com
+VITE_API_URL=https://your-backend-domain.com/api
 VITE_KAKAO_CLIENT_ID=your_kakao_client_id
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```gle_client_id
 ```
+
+## ✅ 배포 전 체크리스트
+
+### 환경변수 설정 확인
+- [ ] `FRONTEND_URL`이 실제 프론트엔드 도메인으로 설정됨
+- [ ] `BACKEND_URL`이 실제 백엔드 도메인으로 설정됨
+- [ ] OAuth 리다이렉트 URI가 실제 도메인으로 설정됨
+- [ ] JWT 시크릿이 프로덕션용으로 변경됨
+- [ ] 데이터베이스 연결 정보가 프로덕션 환경에 맞게 설정됨
+
+### 코드 수정 확인
+- [ ] 하드코딩된 localhost URL이 모두 제거됨
+- [ ] 환경변수를 통한 동적 URL 관리가 구현됨
+- [ ] CORS 설정이 프론트엔드 도메인을 포함하도록 설정됨
 
 ## 🖥️ 백엔드 배포
 

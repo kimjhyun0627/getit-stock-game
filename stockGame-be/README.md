@@ -112,6 +112,10 @@ KAKAO_REDIRECT_URI=http://localhost:3000/api/auth/kakao/callback
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
+
+# 배포용 URL 설정
+FRONTEND_URL=https://your-domain.com
+BACKEND_URL=https://your-domain.com
 ```
 
 ## 🌟 주요 기능

@@ -75,6 +75,9 @@ npm run preview
 # 백엔드 API URL
 VITE_API_URL=http://localhost:3000
 
+# 배포용 설정
+# VITE_API_URL=https://your-backend-domain.com/api
+
 # OAuth 설정 (선택사항)
 VITE_KAKAO_CLIENT_ID=your_kakao_client_id
 VITE_GOOGLE_CLIENT_ID=your_google_client_id

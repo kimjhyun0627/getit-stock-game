@@ -40,6 +40,7 @@ import { UserSession } from './entities/user-session.entity';
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
+    ConfigService,
   ],
   exports: [AuthService, JwtService, JwtAuthGuard, RolesGuard],
 })
