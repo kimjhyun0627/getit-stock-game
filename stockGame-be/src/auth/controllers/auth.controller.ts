@@ -71,7 +71,9 @@ export class AuthController {
       });
 
       // 프론트엔드로 리다이렉트
-      const frontendUrl = this.configService.get<string>('urls.frontend');
+      const frontendUrl =
+        this.configService.get<string>('urls.frontend') ||
+        process.env.FRONTEND_URL;
       console.log('🔍 Kakao 콜백 - frontendUrl:', frontendUrl);
       console.log(
         '🔍 Kakao 콜백 - 환경변수 FRONTEND_URL:',
@@ -141,7 +143,9 @@ export class AuthController {
       });
 
       // 프론트엔드로 리다이렉트
-      const frontendUrl = this.configService.get<string>('urls.frontend');
+      const frontendUrl =
+        this.configService.get<string>('urls.frontend') ||
+        process.env.FRONTEND_URL;
       console.log('🔍 Google 콜백 - frontendUrl:', frontendUrl);
       console.log(
         '🔍 Google 콜백 - 환경변수 FRONTEND_URL:',
