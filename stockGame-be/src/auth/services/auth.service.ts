@@ -64,8 +64,8 @@ export class AuthService {
       await this.kakaoOAuthService.getUserInfo(kakaoAccessToken);
     console.log('✅ 카카오 사용자 정보 획득 성공:', {
       id: kakaoUserInfo.id,
-      email: kakaoUserInfo.email,
-      nickname: kakaoUserInfo.nickname,
+      email: kakaoUserInfo.kakao_account?.email,
+      nickname: kakaoUserInfo.properties?.nickname,
     });
 
     // 3. 사용자 찾기 또는 생성
