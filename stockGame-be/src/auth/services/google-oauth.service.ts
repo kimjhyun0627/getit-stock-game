@@ -23,6 +23,13 @@ export class GoogleOAuthService {
 
   getGoogleAuthUrl(): string {
     console.log('🔗 구글 OAuth URL 생성 중...');
+    console.log('🔍 환경변수 직접 확인:', {
+      GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? '설정됨' : '미설정',
+      GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI
+        ? '설정됨'
+        : '미설정',
+    });
+
     const clientId =
       this.configService.get<string>('google.clientId') ||
       process.env.GOOGLE_CLIENT_ID;
