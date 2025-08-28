@@ -33,33 +33,61 @@ export class AuthService {
   ) {}
 
   getKakaoAuthUrl(): string {
+    console.log('🔗 카카오 OAuth URL 생성 중...');
     const url = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${process.env.KAKAO_REDIRECT_URI}&response_type=code`;
+    console.log('📋 카카오 OAuth 설정:', {
+      clientId: process.env.KAKAO_CLIENT_ID ? '설정됨' : '미설정',
+      redirectUri: process.env.KAKAO_REDIRECT_URI,
+    });
     return url;
   }
 
   getGoogleAuthUrl(): string {
-    return this.googleOAuthService.getGoogleAuthUrl();
+    console.log('🔗 구글 OAuth URL 생성 중...');
+    const url = this.googleOAuthService.getGoogleAuthUrl();
+    console.log('📋 구글 OAuth URL 생성 완료');
+    return url;
   }
 
   async kakaoLogin(authorizationCode: string): Promise<AuthTokens> {
+    console.log('🔄 카카오 로그인 프로세스 시작');
+
     // 1. 카카오 액세스 토큰 획득
+    console.log('🔑 카카오 액세스 토큰 요청 중...');
     const kakaoAccessToken =
       await this.kakaoOAuthService.getAccessToken(authorizationCode);
+    console.log('✅ 카카오 액세스 토큰 획득 성공');
 
     // 2. 카카오 사용자 정보 획득
+    console.log('👤 카카오 사용자 정보 요청 중...');
     const kakaoUserInfo =
       await this.kakaoOAuthService.getUserInfo(kakaoAccessToken);
+    console.log('✅ 카카오 사용자 정보 획득 성공:', {
+      id: kakaoUserInfo.id,
+      email: kakaoUserInfo.email,
+      nickname: kakaoUserInfo.nickname,
+    });
 
     // 3. 사용자 찾기 또는 생성
+    console.log('🔍 기존 사용자 조회 중...');
     let user = await this.userRepository.findOne({
       where: { kakaoId: kakaoUserInfo.id.toString() },
     });
 
     if (!user) {
       // 새 사용자 생성
+      console.log('👤 새 사용자 생성 중...');
       user = await this.createUserFromKakao(kakaoUserInfo);
+      console.log('✅ 새 사용자 생성 완료:', {
+        userId: user.id,
+        email: user.email,
+      });
     } else {
       // 마지막 로그인 시간 업데이트
+      console.log('🔄 기존 사용자 로그인 시간 업데이트:', {
+        userId: user.id,
+        email: user.email,
+      });
       user.lastLoginAt = new Date();
       await this.userRepository.save(user);
     }
