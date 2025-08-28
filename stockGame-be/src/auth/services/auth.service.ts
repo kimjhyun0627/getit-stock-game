@@ -34,7 +34,7 @@ export class AuthService {
 
   getKakaoAuthUrl(): string {
     console.log('🔗 카카오 OAuth URL 생성 중...');
-    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${process.env.KAKAO_REDIRECT_URI}&response_type=code&scope=profile_nickname,account_email`;
+    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${process.env.KAKAO_REDIRECT_URI}&response_type=code`;
     console.log('📋 카카오 OAuth 설정:', {
       clientId: process.env.KAKAO_CLIENT_ID ? '설정됨' : '미설정',
       redirectUri: process.env.KAKAO_REDIRECT_URI,
