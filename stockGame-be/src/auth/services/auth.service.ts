@@ -180,35 +180,71 @@ export class AuthService {
   private async createUserFromKakao(
     kakaoUserInfo: KakaoUserInfo,
   ): Promise<User> {
+    // 첫 번째 사용자인지 확인
+    const userCount = await this.userRepository.count();
+    const isFirstUser = userCount === 0;
+
+    if (isFirstUser) {
+      console.log('👑 첫 번째 사용자입니다. ADMIN 권한을 부여합니다.');
+    }
+
     const user = this.userRepository.create({
       email: kakaoUserInfo.kakao_account.email,
       name: kakaoUserInfo.kakao_account.profile.nickname,
       nickname: kakaoUserInfo.kakao_account.profile.nickname,
       profileImage: kakaoUserInfo.kakao_account.profile.profile_image_url,
       kakaoId: kakaoUserInfo.id.toString(),
-      role: UserRole.USER,
+      role: isFirstUser ? UserRole.ADMIN : UserRole.USER,
       balance: 10000000, // 1000만원
       lastLoginAt: new Date(),
     });
 
-    return await this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+
+    if (isFirstUser) {
+      console.log('🎉 첫 번째 사용자에게 ADMIN 권한을 부여했습니다:', {
+        userId: savedUser.id,
+        name: savedUser.name,
+        role: savedUser.role,
+      });
+    }
+
+    return savedUser;
   }
 
   private async createUserFromGoogle(
     googleUserInfo: GoogleUserInfo,
   ): Promise<User> {
+    // 첫 번째 사용자인지 확인
+    const userCount = await this.userRepository.count();
+    const isFirstUser = userCount === 0;
+
+    if (isFirstUser) {
+      console.log('👑 첫 번째 사용자입니다. ADMIN 권한을 부여합니다.');
+    }
+
     const user = this.userRepository.create({
       email: googleUserInfo.email,
       name: googleUserInfo.name,
       nickname: googleUserInfo.name,
       profileImage: googleUserInfo.picture,
       googleId: googleUserInfo.id,
-      role: UserRole.USER,
+      role: isFirstUser ? UserRole.ADMIN : UserRole.USER,
       balance: 10000000, // 1000만원
       lastLoginAt: new Date(),
     });
 
-    return await this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+
+    if (isFirstUser) {
+      console.log('🎉 첫 번째 사용자에게 ADMIN 권한을 부여했습니다:', {
+        userId: savedUser.id,
+        name: savedUser.name,
+        role: savedUser.role,
+      });
+    }
+
+    return savedUser;
   }
 
   private async cleanupOldSessions(userId: string): Promise<void> {
