@@ -107,7 +107,7 @@ pm2 logs stock-it-backend
 
 #### 1. Dockerfile 생성
 ```dockerfile
-FROM node:18-alpine
+FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
@@ -118,8 +118,8 @@ CMD ["node", "dist/main"]
 
 #### 2. Docker 이미지 빌드 및 실행
 ```bash
-docker build -t stock-it-backend .
-docker run -d -p 3000:3000 --name stock-it-backend stock-it-backend
+docker build -t stockgame-backend .
+docker run -d -p 3000:3000 --name stockgame-backend stockgame-backend
 ```
 
 ### 방법 3: Nginx + Node.js

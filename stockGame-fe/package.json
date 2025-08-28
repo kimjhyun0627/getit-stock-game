@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "NODE_ENV=production tsc -b && vite build",
+    "preview": "vite preview",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "deploy:check": "npm run build:prod && echo '✅ 빌드 성공! GitHub Actions로 배포하세요.'"
   },
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",

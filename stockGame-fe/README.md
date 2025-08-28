@@ -161,6 +161,26 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 
 ## 🚀 배포
 
+### GitHub Pages 배포 (권장)
+
+#### 1. GitHub 저장소 설정
+1. GitHub 저장소에서 **Settings** → **Pages**로 이동
+2. **Source**를 **GitHub Actions**로 설정
+3. **Actions** → **General**에서 **Workflow permissions**를 **Read and write permissions**로 설정
+
+#### 2. 환경변수 설정
+프로덕션 환경을 위한 환경변수를 설정하세요:
+```bash
+# .env.production 파일 생성 (Git에 커밋하지 마세요)
+VITE_API_URL=https://your-backend-domain.com/api
+VITE_NODE_ENV=production
+```
+
+#### 3. 자동 배포
+- `main` 또는 `master` 브랜치에 푸시하면 자동으로 배포됩니다
+- `stockGame-fe/` 폴더의 변경사항만 감지하여 배포합니다
+- 배포된 URL: `https://your-username.github.io/stockGame-fe/`
+
 ### Vercel 배포
 ```bash
 # Vercel CLI 설치
