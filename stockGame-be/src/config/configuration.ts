@@ -31,4 +31,10 @@ export default () => ({
     frontend: process.env.FRONTEND_URL || 'http://localhost:5173',
     backend: process.env.BACKEND_URL || 'http://localhost:3000',
   },
+  // 모바일 호환성을 위한 추가 설정
+  mobile: {
+    enableTouchEvents: true,
+    viewport:
+      'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+  },
 });

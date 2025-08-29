@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
@@ -14,6 +14,9 @@ import GoogleCallback from './pages/GoogleCallback';
 import ProtectedRoute from './components/ProtectedRoute';
 import PageTransition from './components/PageTransition';
 import './App.css';
+
+// 모바일 디바이스 감지 유틸리티
+import { logMobileInfo, isMobile } from './utils/mobile-detection';
 
 function App() {
   const [showUserModal, setShowUserModal] = useState(false);
@@ -68,6 +71,28 @@ function App() {
       window.removeEventListener('message', handleMessage);
       window.removeEventListener('storage', handleStorageChange);
     };
+  }, []);
+
+  // 모바일 디바이스 감지 및 로깅
+  useEffect(() => {
+    // 개발 환경에서만 모바일 정보 로깅
+    if (import.meta.env.DEV) {
+      logMobileInfo();
+    }
+    
+    // 모바일 디바이스인 경우 추가 설정
+    if (isMobile()) {
+      console.log('📱 모바일 디바이스가 감지되었습니다.');
+      
+      // 모바일 최적화 설정
+      document.body.style.touchAction = 'manipulation';
+      document.body.style.userSelect = 'none';
+      
+      // 모바일 브라우저 주소창 숨기기 (일부 브라우저에서 지원)
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+      }, 100);
+    }
   }, []);
 
   const handleUserModalChange = (show: boolean) => {

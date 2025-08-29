@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { User, UserRole } from '../../users/entities/user.entity';
 import { UserSession } from '../entities/user-session.entity';
 import { JwtService } from './jwt.service';
@@ -30,15 +31,33 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly kakaoOAuthService: KakaoOAuthService,
     private readonly googleOAuthService: GoogleOAuthService,
+    private readonly configService: ConfigService,
   ) {}
 
   getKakaoAuthUrl(): string {
     console.log('🔗 카카오 OAuth URL 생성 중...');
-    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${process.env.KAKAO_REDIRECT_URI}&response_type=code`;
+
+    // ConfigService를 통해 환경변수 가져오기
+    const clientId =
+      this.configService.get<string>('kakao.clientId') ||
+      process.env.KAKAO_CLIENT_ID;
+    const redirectUri =
+      this.configService.get<string>('kakao.redirectUri') ||
+      process.env.KAKAO_REDIRECT_URI;
+
+    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
+
     console.log('📋 카카오 OAuth 설정:', {
-      clientId: process.env.KAKAO_CLIENT_ID ? '설정됨' : '미설정',
-      redirectUri: process.env.KAKAO_REDIRECT_URI,
+      clientId: clientId ? '설정됨' : '미설정',
+      redirectUri: redirectUri,
     });
+    console.log('🔍 환경변수 직접 확인:', {
+      processEnvKakaoClientId: process.env.KAKAO_CLIENT_ID
+        ? '설정됨'
+        : '미설정',
+      processEnvKakaoRedirectUri: process.env.KAKAO_REDIRECT_URI,
+    });
+
     return url;
   }
 

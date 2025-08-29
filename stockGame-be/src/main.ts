@@ -50,6 +50,16 @@ async function bootstrap() {
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
   logger.log('✅ CORS 설정이 완료되었습니다.');
 

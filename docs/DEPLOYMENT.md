@@ -124,7 +124,7 @@ CMD ["node", "dist/main"]
 
 #### 2. Docker 이미지 빌드 및 실행
 ```bash
-docker build -t stockgame-backend .
+docker build --no-cache -t stockgame-backend .
 docker run -d -p 3000:3000 --name stockgame-backend stockgame-backend
 ```
 
