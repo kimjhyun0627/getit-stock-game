@@ -78,6 +78,14 @@ const Sell: React.FC = () => {
   const handleSell = async () => {
     if (!selectedItem) return;
     
+    // JWT 토큰 확인
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setError('로그인이 필요합니다. 다시 로그인해주세요.');
+      navigate('/login');
+      return;
+    }
+    
     try {
       setError('');
       setIsLoading(true);
@@ -90,7 +98,7 @@ const Sell: React.FC = () => {
         body: JSON.stringify({
           stockId: selectedItem.stockId,
           quantity: sellQuantity,
-          price: selectedItem.currentPrice,
+          price: selectedItem.stock.currentPrice,
         }),
       });
 
@@ -100,7 +108,7 @@ const Sell: React.FC = () => {
         
         // 사용자 잔고 업데이트
         if (user) {
-          const sellAmount = selectedItem.currentPrice * sellQuantity;
+          const sellAmount = selectedItem.stock.currentPrice * sellQuantity;
           const newBalance = user.balance + sellAmount;
           setUser({ ...user, balance: newBalance });
           localStorage.setItem('user', JSON.stringify({ ...user, balance: newBalance }));
@@ -109,16 +117,29 @@ const Sell: React.FC = () => {
         // 포트폴리오 새로고침
         await fetchPortfolio();
         
-        // 2초 후 홈으로 이동
+        // 2초 후 포트폴리오로 이동
         setTimeout(() => {
-          navigate('/portfolio ');
+          navigate('/portfolio');
         }, 1500);
       } else {
         const errorData = await response.json();
-        setError(`매도 실패: ${errorData.message || '알 수 없는 오류가 발생했습니다.'}`);
+        if (response.status === 401) {
+          setError('로그인이 만료되었습니다. 다시 로그인해주세요.');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          navigate('/login');
+        } else {
+          setError(`매도 실패: ${errorData.message || '알 수 없는 오류가 발생했습니다.'}`);
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '매도 중 오류가 발생했습니다.');
+      console.error('매도 중 오류 발생:', err);
+      if (err instanceof Error && err.message.includes('인증이 만료')) {
+        navigate('/login');
+      } else {
+        setError(err instanceof Error ? err.message : '매도 중 오류가 발생했습니다.');
+      }
     } finally {
       setIsLoading(false);
     }
