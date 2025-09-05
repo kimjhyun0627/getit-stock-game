@@ -25,6 +25,15 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
   }
 
+  if (!response.ok) {
+    try {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+    } catch (parseError) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  }
+
   return response;
 };
 

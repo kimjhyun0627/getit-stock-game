@@ -22,11 +22,31 @@ export class GoogleOAuthService {
   ) {}
 
   getGoogleAuthUrl(): string {
-    // 임시로 process.env 직접 사용
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+    console.log('🔗 구글 OAuth URL 생성 중...');
+    console.log('🔍 환경변수 직접 확인:', {
+      GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? '설정됨' : '미설정',
+      GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI
+        ? '설정됨'
+        : '미설정',
+    });
+
+    const clientId =
+      this.configService.get<string>('google.clientId') ||
+      process.env.GOOGLE_CLIENT_ID;
+    const redirectUri =
+      this.configService.get<string>('google.redirectUri') ||
+      process.env.GOOGLE_REDIRECT_URI;
+
+    console.log('📋 구글 OAuth 설정 확인:', {
+      clientId: clientId ? '설정됨' : '미설정',
+      redirectUri: redirectUri,
+    });
 
     if (!clientId || !redirectUri) {
+      console.error('❌ Google OAuth 설정이 누락됨:', {
+        clientId: !!clientId,
+        redirectUri: !!redirectUri,
+      });
       throw new HttpException(
         'Google OAuth 설정이 누락되었습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -46,12 +66,23 @@ export class GoogleOAuthService {
   }
 
   async getAccessToken(authorizationCode: string): Promise<string> {
-    // 임시로 process.env 직접 사용
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+    console.log('🔑 구글 액세스 토큰 요청 중...');
+    const clientId =
+      this.configService.get<string>('google.clientId') ||
+      process.env.GOOGLE_CLIENT_ID;
+    const clientSecret =
+      this.configService.get<string>('google.clientSecret') ||
+      process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri =
+      this.configService.get<string>('google.redirectUri') ||
+      process.env.GOOGLE_REDIRECT_URI;
 
     if (!clientId || !clientSecret || !redirectUri) {
+      console.error('❌ Google OAuth 토큰 요청 설정 누락:', {
+        clientId: !!clientId,
+        clientSecret: !!clientSecret,
+        redirectUri: !!redirectUri,
+      });
       throw new HttpException(
         'Google OAuth 설정이 누락되었습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { User, UserRole } from '../../users/entities/user.entity';
 import { UserSession } from '../entities/user-session.entity';
 import { JwtService } from './jwt.service';
@@ -30,36 +31,82 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly kakaoOAuthService: KakaoOAuthService,
     private readonly googleOAuthService: GoogleOAuthService,
+    private readonly configService: ConfigService,
   ) {}
 
   getKakaoAuthUrl(): string {
-    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${process.env.KAKAO_REDIRECT_URI}&response_type=code`;
+    console.log('🔗 카카오 OAuth URL 생성 중...');
+
+    // ConfigService를 통해 환경변수 가져오기
+    const clientId =
+      this.configService.get<string>('kakao.clientId') ||
+      process.env.KAKAO_CLIENT_ID;
+    const redirectUri =
+      this.configService.get<string>('kakao.redirectUri') ||
+      process.env.KAKAO_REDIRECT_URI;
+
+    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
+
+    console.log('📋 카카오 OAuth 설정:', {
+      clientId: clientId ? '설정됨' : '미설정',
+      redirectUri: redirectUri,
+    });
+    console.log('🔍 환경변수 직접 확인:', {
+      processEnvKakaoClientId: process.env.KAKAO_CLIENT_ID
+        ? '설정됨'
+        : '미설정',
+      processEnvKakaoRedirectUri: process.env.KAKAO_REDIRECT_URI,
+    });
+
     return url;
   }
 
   getGoogleAuthUrl(): string {
-    return this.googleOAuthService.getGoogleAuthUrl();
+    console.log('🔗 구글 OAuth URL 생성 중...');
+    const url = this.googleOAuthService.getGoogleAuthUrl();
+    console.log('📋 구글 OAuth URL 생성 완료');
+    return url;
   }
 
   async kakaoLogin(authorizationCode: string): Promise<AuthTokens> {
+    console.log('🔄 카카오 로그인 프로세스 시작');
+
     // 1. 카카오 액세스 토큰 획득
+    console.log('🔑 카카오 액세스 토큰 요청 중...');
     const kakaoAccessToken =
       await this.kakaoOAuthService.getAccessToken(authorizationCode);
+    console.log('✅ 카카오 액세스 토큰 획득 성공');
 
     // 2. 카카오 사용자 정보 획득
+    console.log('👤 카카오 사용자 정보 요청 중...');
     const kakaoUserInfo =
       await this.kakaoOAuthService.getUserInfo(kakaoAccessToken);
+    console.log('✅ 카카오 사용자 정보 획득 성공:', {
+      id: kakaoUserInfo.id,
+      email: kakaoUserInfo.kakao_account?.email,
+      nickname: kakaoUserInfo.properties?.nickname,
+    });
 
     // 3. 사용자 찾기 또는 생성
+    console.log('🔍 기존 사용자 조회 중...');
     let user = await this.userRepository.findOne({
       where: { kakaoId: kakaoUserInfo.id.toString() },
     });
 
     if (!user) {
       // 새 사용자 생성
+      console.log('👤 새 사용자 생성 중...');
       user = await this.createUserFromKakao(kakaoUserInfo);
+      console.log('✅ 새 사용자 생성 완료:', {
+        userId: user.id,
+        email: user.email,
+      });
     } else {
       // 마지막 로그인 시간 업데이트
+      console.log('🔄 기존 사용자 로그인 시간 업데이트:', {
+        userId: user.id,
+        email: user.email,
+      });
       user.lastLoginAt = new Date();
       await this.userRepository.save(user);
     }
@@ -152,35 +199,71 @@ export class AuthService {
   private async createUserFromKakao(
     kakaoUserInfo: KakaoUserInfo,
   ): Promise<User> {
+    // 첫 번째 사용자인지 확인
+    const userCount = await this.userRepository.count();
+    const isFirstUser = userCount === 0;
+
+    if (isFirstUser) {
+      console.log('👑 첫 번째 사용자입니다. ADMIN 권한을 부여합니다.');
+    }
+
     const user = this.userRepository.create({
       email: kakaoUserInfo.kakao_account.email,
       name: kakaoUserInfo.kakao_account.profile.nickname,
       nickname: kakaoUserInfo.kakao_account.profile.nickname,
       profileImage: kakaoUserInfo.kakao_account.profile.profile_image_url,
       kakaoId: kakaoUserInfo.id.toString(),
-      role: UserRole.USER,
+      role: isFirstUser ? UserRole.ADMIN : UserRole.USER,
       balance: 10000000, // 1000만원
       lastLoginAt: new Date(),
     });
 
-    return await this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+
+    if (isFirstUser) {
+      console.log('🎉 첫 번째 사용자에게 ADMIN 권한을 부여했습니다:', {
+        userId: savedUser.id,
+        name: savedUser.name,
+        role: savedUser.role,
+      });
+    }
+
+    return savedUser;
   }
 
   private async createUserFromGoogle(
     googleUserInfo: GoogleUserInfo,
   ): Promise<User> {
+    // 첫 번째 사용자인지 확인
+    const userCount = await this.userRepository.count();
+    const isFirstUser = userCount === 0;
+
+    if (isFirstUser) {
+      console.log('👑 첫 번째 사용자입니다. ADMIN 권한을 부여합니다.');
+    }
+
     const user = this.userRepository.create({
       email: googleUserInfo.email,
       name: googleUserInfo.name,
       nickname: googleUserInfo.name,
       profileImage: googleUserInfo.picture,
       googleId: googleUserInfo.id,
-      role: UserRole.USER,
+      role: isFirstUser ? UserRole.ADMIN : UserRole.USER,
       balance: 10000000, // 1000만원
       lastLoginAt: new Date(),
     });
 
-    return await this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+
+    if (isFirstUser) {
+      console.log('🎉 첫 번째 사용자에게 ADMIN 권한을 부여했습니다:', {
+        userId: savedUser.id,
+        name: savedUser.name,
+        role: savedUser.role,
+      });
+    }
+
+    return savedUser;
   }
 
   private async cleanupOldSessions(userId: string): Promise<void> {

@@ -6,6 +6,7 @@ import {
   UseGuards,
   Req,
   Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { PortfoliosService } from './portfolios.service';
 import type { BuyOrderDto, SellOrderDto } from './portfolios.service';
@@ -31,6 +32,9 @@ export class PortfoliosController {
     @Body() buyOrder: BuyOrderDto,
   ) {
     try {
+      if (!req.user || !req.user.id) {
+        throw new BadRequestException('인증된 사용자 정보를 찾을 수 없습니다.');
+      }
       const userId = req.user.id;
       const result = await this.portfoliosService.buyStock(userId, buyOrder);
       return result;
@@ -45,6 +49,9 @@ export class PortfoliosController {
     @Body() sellOrder: SellOrderDto,
   ) {
     try {
+      if (!req.user || !req.user.id) {
+        throw new BadRequestException('인증된 사용자 정보를 찾을 수 없습니다.');
+      }
       const userId = req.user.id;
       const result = await this.portfoliosService.sellStock(userId, sellOrder);
       return result;

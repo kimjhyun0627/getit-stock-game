@@ -31,6 +31,12 @@ FRONTEND_URL=https://your-frontend-domain.com
 BACKEND_URL=https://your-backend-domain.com
 KAKAO_REDIRECT_URI=https://your-backend-domain.com/api/auth/kakao/callback
 GOOGLE_REDIRECT_URI=https://your-backend-domain.com/api/auth/google/callback
+
+# 실제 배포 예시 (stockgame-be.get-it.cloud)
+# FRONTEND_URL=https://your-frontend-domain.com
+# BACKEND_URL=https://stockgame-be.get-it.cloud
+# KAKAO_REDIRECT_URI=https://stockgame-be.get-it.cloud/api/auth/kakao/callback
+# GOOGLE_REDIRECT_URI=https://stockgame-be.get-it.cloud/api/auth/google/callback
 ```
 
 #### 프론트엔드 (`.env`)
@@ -118,7 +124,7 @@ CMD ["node", "dist/main"]
 
 #### 2. Docker 이미지 빌드 및 실행
 ```bash
-docker build -t stockgame-backend .
+docker build --no-cache -t stockgame-backend .
 docker run -d -p 3000:3000 --name stockgame-backend stockgame-backend
 ```
 

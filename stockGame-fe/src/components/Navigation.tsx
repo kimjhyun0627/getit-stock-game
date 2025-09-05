@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, TrendingUp, TrendingDown, PieChart, User, Sparkles, Settings, LogIn, LogOut, Crown, Newspaper, Trophy, Copy, Check } from 'lucide-react';
+import { Home, TrendingUp, TrendingDown, PieChart, User, Settings, LogIn, LogOut, Newspaper, Trophy, Copy, Check } from 'lucide-react';
 
 interface NavigationProps {
   isLoggedIn: boolean;

@@ -19,8 +19,22 @@ export default () => ({
       process.env.KAKAO_REDIRECT_URI ||
       'http://localhost:3000/api/auth/kakao/callback',
   },
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID || 'your-google-client-id',
+    clientSecret:
+      process.env.GOOGLE_CLIENT_SECRET || 'your-google-client-secret',
+    redirectUri:
+      process.env.GOOGLE_REDIRECT_URI ||
+      'http://localhost:3000/api/auth/google/callback',
+  },
   urls: {
     frontend: process.env.FRONTEND_URL || 'http://localhost:5173',
     backend: process.env.BACKEND_URL || 'http://localhost:3000',
+  },
+  // 모바일 호환성을 위한 추가 설정
+  mobile: {
+    enableTouchEvents: true,
+    viewport:
+      'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
   },
 });

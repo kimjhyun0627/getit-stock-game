@@ -1,10 +1,6 @@
 import React from 'react';
 
-interface GoogleLoginProps {
-  onLogin: () => void;
-}
-
-const GoogleLogin: React.FC<GoogleLoginProps> = ({ onLogin }) => {
+const GoogleLogin: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
       // 백엔드에서 구글 OAuth URL 가져오기

@@ -84,6 +84,14 @@ const Buy: React.FC = () => {
       return;
     }
 
+    // JWT 토큰 확인
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setError('로그인이 필요합니다. 다시 로그인해주세요.');
+      navigate('/login');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -117,11 +125,23 @@ const Buy: React.FC = () => {
         }, 1500);
       } else {
         const errorData = await response.json();
-        setError(`매수 실패: ${errorData.message || '알 수 없는 오류가 발생했습니다.'}`);
+        if (response.status === 401) {
+          setError('로그인이 만료되었습니다. 다시 로그인해주세요.');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          navigate('/login');
+        } else {
+          setError(`매수 실패: ${errorData.message || '알 수 없는 오류가 발생했습니다.'}`);
+        }
       }
     } catch (error) {
       console.error('매수 중 오류 발생:', error);
-      setError('매수 중 오류가 발생했습니다. 다시 시도해주세요.');
+      if (error instanceof Error && error.message.includes('인증이 만료')) {
+        navigate('/login');
+      } else {
+        setError('매수 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsLoading(false);
     }
