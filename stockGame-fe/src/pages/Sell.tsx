@@ -4,18 +4,15 @@ import { apiFetch } from '../utils/api';
 import { TrendingDown, AlertCircle, CheckCircle, DollarSign } from 'lucide-react';
 
 interface PortfolioItem {
-  id: string;
   stockId: string;
+  stockName: string;
+  symbol: string;
   quantity: number;
   averagePrice: number;
-  stock: {
-    id: string;
-    name: string;
-    symbol: string;
-    currentPrice: number;
-    change: number;
-    changePercent: number;
-  };
+  currentPrice: number;
+  totalValue: number;
+  profitLoss: number;
+  profitLossPercent: number;
 }
 
 interface User {
@@ -76,7 +73,15 @@ const Sell: React.FC = () => {
   };
 
   const handleSell = async () => {
-    if (!selectedItem) return;
+    if (!selectedItem) {
+      setError('매도할 주식을 선택해주세요.');
+      return;
+    }
+
+    if (!selectedItem.currentPrice || selectedItem.currentPrice <= 0) {
+      setError('주식 가격 정보를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
+      return;
+    }
     
     // JWT 토큰 확인
     const token = localStorage.getItem('accessToken');
@@ -98,7 +103,7 @@ const Sell: React.FC = () => {
         body: JSON.stringify({
           stockId: selectedItem.stockId,
           quantity: sellQuantity,
-          price: selectedItem.stock.currentPrice,
+          price: selectedItem.currentPrice,
         }),
       });
 
@@ -108,7 +113,7 @@ const Sell: React.FC = () => {
         
         // 사용자 잔고 업데이트
         if (user) {
-          const sellAmount = selectedItem.stock.currentPrice * sellQuantity;
+          const sellAmount = selectedItem.currentPrice * sellQuantity;
           const newBalance = user.balance + sellAmount;
           setUser({ ...user, balance: newBalance });
           localStorage.setItem('user', JSON.stringify({ ...user, balance: newBalance }));
@@ -154,20 +159,18 @@ const Sell: React.FC = () => {
   };
 
   const getCurrentPrice = (stockId: string) => {
-    const stock = portfolio.find(p => p.stockId === stockId)?.stock;
-    return stock?.currentPrice || 0;
+    const portfolioItem = portfolio.find(p => p.stockId === stockId);
+    return portfolioItem?.currentPrice || 0;
   };
 
   const calculateSellAmount = () => {
-    if (!selectedItem) return 0;
-    const currentPrice = getCurrentPrice(selectedItem.stockId);
-    return currentPrice * sellQuantity;
+    if (!selectedItem || !selectedItem.currentPrice) return 0;
+    return selectedItem.currentPrice * sellQuantity;
   };
 
   const calculateProfitLoss = () => {
-    if (!selectedItem) return 0;
-    const currentPrice = getCurrentPrice(selectedItem.stockId);
-    return (currentPrice - selectedItem.averagePrice) * sellQuantity;
+    if (!selectedItem || !selectedItem.currentPrice) return 0;
+    return (selectedItem.currentPrice - selectedItem.averagePrice) * sellQuantity;
   };
 
   if (portfolio.length === 0) {
@@ -228,9 +231,10 @@ const Sell: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">보유 주식</h2>
             <div className="space-y-3">
               {portfolio.map((item) => {
-                const currentPrice = getCurrentPrice(item.stockId);
-                const profitLoss = (currentPrice - item.averagePrice) * item.quantity;
-                const profitLossPercent = ((currentPrice - item.averagePrice) / item.averagePrice) * 100;
+                const currentPrice = item.currentPrice || 0;
+                const profitLoss = currentPrice > 0 ? (currentPrice - item.averagePrice) * item.quantity : 0;
+                const profitLossPercent = currentPrice > 0 && item.averagePrice > 0 ? 
+                  ((currentPrice - item.averagePrice) / item.averagePrice) * 100 : 0;
                 
                 return (
                   <div
@@ -254,7 +258,9 @@ const Sell: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-gray-600">현재가:</span>
-                        <span className="ml-2 font-medium">{formatPrice(currentPrice)}원</span>
+                        <span className="ml-2 font-medium">
+                          {currentPrice > 0 ? `${formatPrice(currentPrice)}원` : '가격 정보 없음'}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-600">수익/손실:</span>
@@ -301,11 +307,15 @@ const Sell: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-gray-600">현재가:</span>
-                      <span className="ml-2 font-medium">{formatPrice(getCurrentPrice(selectedItem.stockId))}원</span>
+                      <span className="ml-2 font-medium">
+                        {selectedItem.currentPrice > 0 ? `${formatPrice(selectedItem.currentPrice)}원` : '가격 정보 없음'}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-600">총 보유 가치:</span>
-                      <span className="ml-2 font-medium">{formatPrice(selectedItem.quantity * getCurrentPrice(selectedItem.stockId))}원</span>
+                      <span className="ml-2 font-medium">
+                        {selectedItem.currentPrice > 0 ? `${formatPrice(selectedItem.quantity * selectedItem.currentPrice)}원` : '계산 불가'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -365,12 +375,15 @@ const Sell: React.FC = () => {
                 {/* 매도 버튼 */}
                 <button
                   onClick={handleSell}
-                  disabled={isLoading}
+                  disabled={isLoading || !selectedItem?.currentPrice || selectedItem.currentPrice <= 0}
                   className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 ${
-                    isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 btn-hover-effect'
+                    isLoading || !selectedItem?.currentPrice || selectedItem.currentPrice <= 0
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 btn-hover-effect'
                   }`}
                 >
-                  {isLoading ? '매도 처리 중...' : '매도하기'}
+                  {isLoading ? '매도 처리 중...' : 
+                   !selectedItem?.currentPrice || selectedItem.currentPrice <= 0 ? '가격 정보 없음' : '매도하기'}
                 </button>
               </>
             ) : (
