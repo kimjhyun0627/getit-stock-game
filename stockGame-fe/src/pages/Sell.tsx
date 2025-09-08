@@ -315,7 +315,7 @@ const Sell: React.FC = () => {
                       <span className="text-gray-600">총 보유 가치:</span>
                       <span className="ml-2 font-medium">
                         {selectedItem.currentPrice > 0 ? `${formatPrice(selectedItem.quantity * selectedItem.currentPrice)}원` : '계산 불가'}
-                      </span>
+                      </span>pages 한
                     </div>
                   </div>
                 </div>
