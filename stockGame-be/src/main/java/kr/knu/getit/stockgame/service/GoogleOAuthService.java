@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -63,7 +64,7 @@ public class GoogleOAuthService {
                 throw new RuntimeException("Google 액세스 토큰을 가져오는데 실패했습니다.");
             }
 
-            JsonNode node = objectMapper.readTree(response.getBody());
+            JsonNode node = objectMapper.readTree(Objects.requireNonNull(response.getBody()));
             return node.path("access_token").asText();
         } catch (Exception e) {
             throw new RuntimeException("Google 액세스 토큰 실패", e);
@@ -72,8 +73,8 @@ public class GoogleOAuthService {
 
     public GoogleUserInfo getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+        headers.setBearerAuth(Objects.requireNonNull(accessToken));
+        HttpEntity<Void> request = new HttpEntity<>(Objects.requireNonNull(headers));
         ResponseEntity<String> response = restTemplate.exchange(
                 "https://www.googleapis.com/oauth2/v2/userinfo",
                 HttpMethod.GET,
@@ -86,7 +87,7 @@ public class GoogleOAuthService {
         }
 
         try {
-            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode root = objectMapper.readTree(Objects.requireNonNull(response.getBody()));
             return new GoogleUserInfo(
                     root.path("id").asText(),
                     root.path("email").asText(""),

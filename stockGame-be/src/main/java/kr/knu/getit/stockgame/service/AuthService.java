@@ -17,8 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -107,7 +107,7 @@ public class AuthService {
                 .lastLoginAt(Instant.now())
                 .isLeaderboardVisible(true)
                 .build();
-        return userRepository.save(user);
+        return Objects.requireNonNull(userRepository.save(user));
     }
 
     private User createUserFromGoogle(GoogleOAuthService.GoogleUserInfo info) {
@@ -124,7 +124,7 @@ public class AuthService {
                 .lastLoginAt(Instant.now())
                 .isLeaderboardVisible(true)
                 .build();
-        return userRepository.save(user);
+        return Objects.requireNonNull(userRepository.save(user));
     }
 
     private void saveRefreshToken(String userId, String refreshToken) {
@@ -132,11 +132,11 @@ public class AuthService {
         if (refreshExpiresIn != null && refreshExpiresIn.endsWith("d")) {
             days = Long.parseLong(refreshExpiresIn.replace("d", ""));
         }
-        UserSession session = UserSession.builder()
-                .userId(userId)
-                .refreshToken(refreshToken)
+        UserSession session = Objects.requireNonNull(UserSession.builder()
+                .userId(Objects.requireNonNull(userId))
+                .refreshToken(Objects.requireNonNull(refreshToken))
                 .expiresAt(Instant.now().plus(days, ChronoUnit.DAYS))
-                .build();
+                .build());
         sessionRepository.save(session);
     }
 
@@ -150,19 +150,33 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.");
         }
 
-        User user = userRepository.findById(session.getUserId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+        User user = Objects.requireNonNull(userRepository.findById(session.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다.")));
 
         sessionRepository.delete(session);
         String newRefresh = jwtUtil.generateRefreshToken(user.getId());
         saveRefreshToken(user.getId(), newRefresh);
-        String newAccess = jwtUtil.generateAccessToken(user.getId(), user.getEmail(), user.getRole().name());
+        String newAccess = jwtUtil.generateAccessToken(user.getId(), Objects.requireNonNull(user.getEmail()), user.getRole().name());
 
         return toAuthResponse(user, newAccess, newRefresh);
     }
 
     public Optional<User> validateUser(String userId) {
         return userRepository.findById(userId);
+    }
+
+    @Transactional
+    public AuthDto.AuthTokensResponse createTokensForUser(User user) {
+        String userId = Objects.requireNonNull(user.getId());
+        sessionRepository.deleteByUserId(userId);
+        String refreshToken = jwtUtil.generateRefreshToken(userId);
+        saveRefreshToken(userId, refreshToken);
+        String accessToken = jwtUtil.generateAccessToken(
+                userId,
+                Objects.requireNonNull(user.getEmail()),
+                user.getRole().name()
+        );
+        return toAuthResponse(user, accessToken, refreshToken);
     }
 
     private static AuthDto.AuthTokensResponse toAuthResponse(User user, String accessToken, String refreshToken) {

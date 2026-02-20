@@ -2,50 +2,59 @@ package kr.knu.getit.stockgame.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import kr.knu.getit.stockgame.entity.News;
 
-import java.time.Instant;
+public final class NewsDto {
 
-public class NewsDto {
-
-    @Data
-    public static class Create {
-        @NotBlank
-        private String title;
-        @NotBlank
-        private String summary;
-        @NotBlank
-        private String content;
-        @NotBlank
-        private String category;
-        private Boolean isPublished;
+    public record Create(
+            @NotBlank String title,
+            @NotBlank String summary,
+            @NotBlank String content,
+            @NotBlank String category,
+            Boolean isPublished,
+            Integer publishYear
+    ) {
+        public static Create of(String title, String summary, String content, String category, Boolean isPublished, Integer publishYear) {
+            return new Create(title, summary, content, category, isPublished, publishYear);
+        }
     }
 
-    @Data
-    public static class Update {
-        private String title;
-        private String summary;
-        private String content;
-        private String category;
-        private Boolean isPublished;
-    }
+    public record Update(
+            String title,
+            String summary,
+            String content,
+            String category,
+            Boolean isPublished,
+            Integer publishYear
+    ) {}
 
-    @Data
-    public static class Publish {
-        @NotNull
-        private Boolean isPublished;
-    }
+    public record Publish(@NotNull Boolean isPublished) {}
 
-    @Data
-    public static class Response {
-        private String id;
-        private String title;
-        private String summary;
-        private String content;
-        private String category;
-        private Boolean isPublished;
-        private String publishedAt;
-        private String createdAt;
-        private String updatedAt;
+    public record Response(
+            String id,
+            String title,
+            String summary,
+            String content,
+            String category,
+            Boolean isPublished,
+            Integer publishYear,
+            String publishedAt,
+            String createdAt,
+            String updatedAt
+    ) {
+        public static Response from(News n) {
+            return new Response(
+                    n.getId(),
+                    n.getTitle(),
+                    n.getSummary(),
+                    n.getContent(),
+                    n.getCategory(),
+                    n.getIsPublished(),
+                    n.getPublishYear(),
+                    n.getPublishedAt() != null ? n.getPublishedAt().toString() : null,
+                    n.getCreatedAt() != null ? n.getCreatedAt().toString() : null,
+                    n.getUpdatedAt() != null ? n.getUpdatedAt().toString() : null
+            );
+        }
     }
 }

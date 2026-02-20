@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "news")
@@ -36,6 +35,9 @@ public class News {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isPublished = false;
+
+    @Column(name = "publish_year")
+    private Integer publishYear;
 
     @Column(updatable = false)
     private Instant createdAt;

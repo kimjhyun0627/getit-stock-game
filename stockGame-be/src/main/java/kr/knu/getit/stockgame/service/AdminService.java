@@ -23,7 +23,7 @@ public class AdminService {
     public Map<String, Object> getDashboardStats() {
         List<Stock> stocks = stockService.findAll();
         List<NewsDto.Response> news = newsService.findAll();
-        List<NewsDto.Response> published = newsService.findPublished();
+        List<NewsDto.Response> published = newsService.findPublished(null);
 
         Map<String, Object> stockStats = new HashMap<>();
         stockStats.put("total", stocks.size());
@@ -37,7 +37,7 @@ public class AdminService {
         newsStats.put("published", published.size());
         newsStats.put("unpublished", news.size() - published.size());
         Map<String, Long> byCategory = news.stream()
-                .collect(Collectors.groupingBy(NewsDto.Response::getCategory, Collectors.counting()));
+                .collect(Collectors.groupingBy(NewsDto.Response::category, Collectors.counting()));
         newsStats.put("byCategory", byCategory);
 
         return Map.of(

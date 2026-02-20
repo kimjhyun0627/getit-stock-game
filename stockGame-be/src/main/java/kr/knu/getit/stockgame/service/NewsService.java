@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,81 +22,71 @@ public class NewsService {
     @Transactional(readOnly = true)
     public List<NewsDto.Response> findAll() {
         return newsRepository.findAllByOrderByUpdatedAtDesc().stream()
-                .map(this::toResponse)
+                .map(NewsDto.Response::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<NewsDto.Response> findPublished() {
-        return newsRepository.findByIsPublishedTrueOrderByUpdatedAtDesc().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public List<NewsDto.Response> findPublished(Integer year) {
+        List<News> list = year != null
+                ? newsRepository.findPublishedByYear(year)
+                : newsRepository.findByIsPublishedTrueOrderByUpdatedAtDesc();
+        return list.stream().map(NewsDto.Response::from).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public News findOne(String id) {
-        return newsRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ID " + id + "인 뉴스를 찾을 수 없습니다."));
+        return Objects.requireNonNull(newsRepository.findById(Objects.requireNonNull(id))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ID " + id + "인 뉴스를 찾을 수 없습니다.")));
     }
 
     @Transactional(readOnly = true)
     public List<NewsDto.Response> findByCategory(String category) {
         return newsRepository.findByCategoryOrderByUpdatedAtDesc(category).stream()
-                .map(this::toResponse)
+                .map(NewsDto.Response::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public News create(NewsDto.Create dto) {
         News news = News.builder()
-                .title(dto.getTitle())
-                .summary(dto.getSummary())
-                .content(dto.getContent())
-                .category(dto.getCategory())
-                .isPublished(Boolean.TRUE.equals(dto.getIsPublished()))
+                .title(dto.title())
+                .summary(dto.summary())
+                .content(dto.content())
+                .category(dto.category())
+                .isPublished(Boolean.TRUE.equals(dto.isPublished()))
+                .publishYear(dto.publishYear())
                 .build();
         return newsRepository.save(news);
     }
 
     @Transactional
     public News update(String id, NewsDto.Update dto) {
-        News news = findOne(id);
-        if (dto.getIsPublished() != null) {
-            if (dto.getIsPublished()) news.publish();
+        News news = Objects.requireNonNull(findOne(id));
+        if (dto.isPublished() != null) {
+            if (dto.isPublished()) news.publish();
             else news.unpublish();
         }
-        if (dto.getTitle() != null) news.setTitle(dto.getTitle());
-        if (dto.getSummary() != null) news.setSummary(dto.getSummary());
-        if (dto.getContent() != null) news.setContent(dto.getContent());
-        if (dto.getCategory() != null) news.setCategory(dto.getCategory());
+        if (dto.title() != null) news.setTitle(dto.title());
+        if (dto.summary() != null) news.setSummary(dto.summary());
+        if (dto.content() != null) news.setContent(dto.content());
+        if (dto.category() != null) news.setCategory(dto.category());
+        if (dto.publishYear() != null) news.setPublishYear(dto.publishYear());
         return newsRepository.save(news);
     }
 
     @Transactional
     public News publish(String id, NewsDto.Publish dto) {
-        News news = findOne(id);
-        if (dto.getIsPublished()) news.publish();
+        News news = Objects.requireNonNull(findOne(id));
+        if (dto.isPublished()) news.publish();
         else news.unpublish();
         return newsRepository.save(news);
     }
 
     @Transactional
     public void remove(String id) {
-        News news = findOne(id);
+        News news = Objects.requireNonNull(findOne(id));
         newsRepository.delete(news);
     }
 
-    private NewsDto.Response toResponse(News n) {
-        NewsDto.Response r = new NewsDto.Response();
-        r.setId(n.getId());
-        r.setTitle(n.getTitle());
-        r.setSummary(n.getSummary());
-        r.setContent(n.getContent());
-        r.setCategory(n.getCategory());
-        r.setIsPublished(n.getIsPublished());
-        r.setPublishedAt(n.getPublishedAt() != null ? n.getPublishedAt().toString() : null);
-        r.setCreatedAt(n.getCreatedAt() != null ? n.getCreatedAt().toString() : null);
-        r.setUpdatedAt(n.getUpdatedAt() != null ? n.getUpdatedAt().toString() : null);
-        return r;
-    }
 }

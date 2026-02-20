@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,10 +26,10 @@ public class PortfolioService {
 
     @Transactional
     public Portfolio buyStock(String userId, PortfolioDto.BuyOrder order) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        Stock stock = stockRepository.findById(order.getStockId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다."));
+        User user = Objects.requireNonNull(userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.")));
+        Stock stock = Objects.requireNonNull(stockRepository.findById(order.getStockId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다.")));
 
         double totalCost = order.getPrice() * order.getQuantity();
         if (user.getBalance().doubleValue() < totalCost) {
@@ -51,7 +52,7 @@ public class PortfolioService {
                     .averagePrice(order.getPrice())
                     .build();
         }
-        portfolio = portfolioRepository.save(portfolio);
+        portfolio = Objects.requireNonNull(portfolioRepository.save(portfolio));
 
         user.setBalance(user.getBalance().subtract(BigDecimal.valueOf(totalCost)));
         userRepository.save(user);
@@ -74,13 +75,13 @@ public class PortfolioService {
 
     @Transactional
     public Portfolio sellStock(String userId, PortfolioDto.SellOrder order) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        Stock stock = stockRepository.findById(order.getStockId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다."));
+        User user = Objects.requireNonNull(userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.")));
+        Stock stock = Objects.requireNonNull(stockRepository.findById(order.getStockId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다.")));
 
-        Portfolio portfolio = portfolioRepository.findByUserIdAndStockId(userId, order.getStockId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "보유하고 있지 않은 주식입니다."));
+        Portfolio portfolio = Objects.requireNonNull(portfolioRepository.findByUserIdAndStockId(userId, order.getStockId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "보유하고 있지 않은 주식입니다.")));
 
         if (portfolio.getQuantity() < order.getQuantity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "보유 수량보다 많은 수량을 매도할 수 없습니다.");
@@ -119,7 +120,7 @@ public class PortfolioService {
     public List<PortfolioDto.PortfolioResponse> getUserPortfolio(String userId) {
         List<Portfolio> list = portfolioRepository.findByUserIdOrderByUpdatedAtDesc(userId);
         return list.stream().map(p -> {
-            Stock s = stockRepository.findById(p.getStockId()).orElse(null);
+            Stock s = stockRepository.findById(Objects.requireNonNull(p).getStockId()).orElse(null);
             if (s == null) return null;
             double currentPrice = s.getCurrentPrice();
             double totalValue = p.getQuantity() * currentPrice;
@@ -145,17 +146,18 @@ public class PortfolioService {
     public List<PortfolioDto.TransactionResponse> getUserTransactions(String userId) {
         List<Transaction> list = transactionRepository.findByUserIdOrderByCreatedAtDescIdDesc(userId);
         return list.stream().map(t -> {
-            Stock s = stockRepository.findById(t.getStockId()).orElse(null);
+            Transaction tx = Objects.requireNonNull(t);
+            Stock s = stockRepository.findById(tx.getStockId()).orElse(null);
             PortfolioDto.TransactionResponse r = new PortfolioDto.TransactionResponse();
-            r.setId(t.getId());
-            r.setStockId(t.getStockId());
+            r.setId(tx.getId());
+            r.setStockId(tx.getStockId());
             r.setStockName(s != null ? s.getName() : "");
             r.setSymbol(s != null ? s.getSymbol() : "");
-            r.setType(t.getType() == TransactionType.BUY ? "buy" : "sell");
-            r.setQuantity(t.getQuantity());
-            r.setPrice(t.getPrice());
-            r.setTotalAmount(t.getTotalAmount());
-            r.setCreatedAt(t.getCreatedAt() != null ? t.getCreatedAt().toString() : null);
+            r.setType(tx.getType() == TransactionType.BUY ? "buy" : "sell");
+            r.setQuantity(tx.getQuantity());
+            r.setPrice(tx.getPrice());
+            r.setTotalAmount(tx.getTotalAmount());
+            r.setCreatedAt(tx.getCreatedAt() != null ? tx.getCreatedAt().toString() : null);
             return r;
         }).collect(Collectors.toList());
     }
@@ -167,8 +169,8 @@ public class PortfolioService {
 
     @Transactional(readOnly = true)
     public PortfolioDto.BalanceResponse getUserBalance(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+        User user = Objects.requireNonNull(userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.")));
         PortfolioDto.BalanceResponse r = new PortfolioDto.BalanceResponse();
         r.setBalance(user.getBalance());
         return r;
@@ -176,8 +178,8 @@ public class PortfolioService {
 
     @Transactional(readOnly = true)
     public PortfolioDto.VolumeStats getStockVolumeStats(String stockId) {
-        Stock stock = stockRepository.findById(stockId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다."));
+        Stock stock = Objects.requireNonNull(stockRepository.findById(stockId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다.")));
         Long buyVol = transactionRepository.sumQuantityByStockIdAndType(stockId, TransactionType.BUY);
         Long sellVol = transactionRepository.sumQuantityByStockIdAndType(stockId, TransactionType.SELL);
         PortfolioDto.VolumeStats s = new PortfolioDto.VolumeStats();
@@ -191,11 +193,12 @@ public class PortfolioService {
     @Transactional(readOnly = true)
     public List<PortfolioDto.VolumeStatsByStock> getAllStockVolumeStats() {
         return stockRepository.findAll().stream().map(stock -> {
+            Stock s = Objects.requireNonNull(stock);
             PortfolioDto.VolumeStatsByStock v = new PortfolioDto.VolumeStatsByStock();
-            PortfolioDto.VolumeStats stats = getStockVolumeStats(stock.getId());
-            v.setStockId(stock.getId());
-            v.setStockName(stock.getName());
-            v.setStockSymbol(stock.getSymbol());
+            PortfolioDto.VolumeStats stats = getStockVolumeStats(s.getId());
+            v.setStockId(s.getId());
+            v.setStockName(s.getName());
+            v.setStockSymbol(s.getSymbol());
             v.setTotalVolume(stats.getTotalVolume());
             v.setBuyVolume(stats.getBuyVolume());
             v.setSellVolume(stats.getSellVolume());

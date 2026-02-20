@@ -9,6 +9,9 @@ pnpm-debug.log*
 build/
 dist/
 
+# Maven
+target/
+
 # Environment variables
 .env
 .env.local

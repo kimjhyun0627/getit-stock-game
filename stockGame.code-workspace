@@ -1,0 +1,21 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "stockGame (root)"
+    },
+    {
+      "path": "stockGame-be",
+      "name": "stockGame-be (Maven)"
+    },
+    {
+      "path": "stockGame-fe",
+      "name": "stockGame-fe (Frontend)"
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.import.maven.depth": 3,
+    "java.compile.nullAnalysis.mode": "automatic"
+  }
+}

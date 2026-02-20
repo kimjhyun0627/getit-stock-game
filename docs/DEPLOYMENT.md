@@ -6,49 +6,34 @@ STOCK IT 게임의 프론트엔드와 백엔드를 다양한 환경에 배포하
 
 ## 📋 사전 요구사항
 
-- Node.js 18.0.0 이상
-- npm 9.0.0 이상
+- Docker 및 Docker Compose (권장 배포 방식)
+- 또는 Java 17+, Maven 3.8+ (백엔드 단독 실행 시)
 - Git
-- 서버 접근 권한 (백엔드 배포 시)
+- 서버 접근 권한 (배포 시)
 
 ## 🔧 환경 설정
 
-### 1. 환경변수 파일 생성
+### 1. Docker로 배포할 때 (권장)
 
-#### 백엔드 (`.env`)
+**프로젝트 루트**에만 환경 변수 파일을 둡니다. `fe`/`be` 폴더 안에는 `.env`나 `env.sample`을 두지 않습니다.
+
+- 루트 `env.sample`을 복사해 `.env`로 저장한 뒤, 배포용 값으로 수정하세요.
+- 변수 목록: `MYSQL_*`, `JWT_SECRET`, `KAKAO_*`, `GOOGLE_*`, `FRONTEND_URL` 등. (자세한 예시는 프로젝트 루트의 `env.sample` 참고.)
+
 ```bash
-# Backend/.env
-PORT=3000
-NODE_ENV=production
-JWT_SECRET=your_production_jwt_secret
-KAKAO_CLIENT_ID=your_kakao_client_id
-KAKAO_CLIENT_SECRET=your_kakao_client_secret
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-# 배포용 URL 설정 (중요!)
-FRONTEND_URL=https://your-frontend-domain.com
-BACKEND_URL=https://your-backend-domain.com
-KAKAO_REDIRECT_URI=https://your-backend-domain.com/api/auth/kakao/callback
-GOOGLE_REDIRECT_URI=https://your-backend-domain.com/api/auth/google/callback
-
-# 실제 배포 예시 (stockgame-be.get-it.cloud)
-# FRONTEND_URL=https://your-frontend-domain.com
-# BACKEND_URL=https://stockgame-be.get-it.cloud
-# KAKAO_REDIRECT_URI=https://stockgame-be.get-it.cloud/api/auth/kakao/callback
-# GOOGLE_REDIRECT_URI=https://stockgame-be.get-it.cloud/api/auth/google/callback
+# 프로젝트 루트에서
+cp env.sample .env
+# .env 편집 후
+docker compose up -d --build
 ```
 
-#### 프론트엔드 (`.env`) — Docker 배포 시에는 불필요
-**Docker로 배포할 때**: 프론트 이미지는 상대 경로 `/api`로 빌드되며, `.dockerignore`로 `.env`가 제외되므로 **프론트엔드 .env 없이** 배포할 수 있습니다. Nginx(또는 리버스 프록시)에서 `/api`를 백엔드로 프록시하면 됩니다.
+프론트엔드는 상대 경로 `/api`로 빌드되므로 별도 .env 없이 동작합니다.
 
-정적 빌드·GitHub Pages 등 Docker 없이 배포할 때만 아래처럼 사용합니다:
-```bash
-# Frontend/.env (Docker 미사용 시에만)
-VITE_API_URL=https://your-backend-domain.com/api
-VITE_KAKAO_CLIENT_ID=your_kakao_client_id
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```
+### 2. Docker 없이 배포할 때 (정적 프론트·별도 백엔드 등)
+
+백엔드는 환경 변수로 `PORT`, `JWT_SECRET`, `DB_*`, OAuth, `FRONTEND_URL` 등을 설정합니다. (Spring Boot `application.yml` 또는 시스템 환경 변수.)
+
+프론트엔드는 빌드 시 `VITE_API_URL` 등이 필요하면 해당 배포 방식 문서를 참고하세요.
 
 ## ✅ 배포 전 체크리스트
 
@@ -66,71 +51,32 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 
 ## 🖥️ 백엔드 배포
 
-### 방법 1: PM2를 사용한 배포 (권장)
+이 프로젝트의 백엔드는 **Spring Boot(Java)** 입니다. Node.js/PM2 방식은 사용하지 않습니다.
 
-#### 1. 서버에 Node.js 설치
+### 방법 1: Docker Compose로 한 번에 배포 (권장)
+
+프론트엔드·백엔드·MySQL을 한 번에 띄웁니다.
+
 ```bash
-# Ubuntu/Debian
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# CentOS/RHEL
-curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
-sudo yum install -y nodejs
+# 프로젝트 루트에서
+cp env.sample .env
+# .env 편집 (DB, JWT, OAuth, ADMIN_PASSWORD 등)
+docker compose up -d --build
 ```
 
-#### 2. PM2 설치
+서버 앞단에 Nginx 등 리버스 프록시를 두고 HTTPS·도메인을 설정하면 됩니다.
+
+### 방법 2: 백엔드만 JAR로 실행
+
 ```bash
-npm install -g pm2
+cd stockGame-be
+mvn package -DskipTests
+java -jar target/stockgame-be-1.0.0.jar
 ```
 
-#### 3. 프로젝트 클론 및 설정
-```bash
-git clone https://github.com/username/stock-it-game.git
-cd stock-it-game/backend
-npm install
-npm run build
-```
+환경 변수로 `PORT`, `JWT_SECRET`, `DB_*`, `FRONTEND_URL`, `ADMIN_PASSWORD` 등을 설정합니다.
 
-#### 4. 환경변수 설정
-```bash
-cp env.example .env
-# .env 파일을 편집하여 실제 값으로 설정
-```
-
-#### 5. PM2로 실행
-```bash
-pm2 start dist/main.js --name "stock-it-backend"
-pm2 startup
-pm2 save
-```
-
-#### 6. PM2 모니터링
-```bash
-pm2 monit
-pm2 logs stock-it-backend
-```
-
-### 방법 2: Docker를 사용한 배포
-
-#### 1. Dockerfile 생성
-```dockerfile
-FROM node:22-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist ./dist
-EXPOSE 3000
-CMD ["node", "dist/main"]
-```
-
-#### 2. Docker 이미지 빌드 및 실행
-```bash
-docker build --no-cache -t stockgame-backend .
-docker run -d -p 3000:3000 --name stockgame-backend stockgame-backend
-```
-
-### 방법 3: Nginx + Node.js
+### 방법 3: Nginx 리버스 프록시
 
 #### 1. Nginx 설치
 ```bash
@@ -288,11 +234,16 @@ sudo crontab -e
 
 ## 📊 모니터링 및 로깅
 
-### PM2 모니터링
+### Docker Compose 로그
 ```bash
-pm2 monit
-pm2 logs
-pm2 status
+# 백엔드 로그
+docker compose logs -f backend
+
+# 프론트엔드 로그
+docker compose logs -f frontend
+
+# MySQL 로그
+docker compose logs -f mysql
 ```
 
 ### Nginx 로그
@@ -304,20 +255,11 @@ sudo tail -f /var/log/nginx/access.log
 sudo tail -f /var/log/nginx/error.log
 ```
 
-### 애플리케이션 로그
-```bash
-# PM2 로그
-pm2 logs stock-it-backend
-
-# Docker 로그
-docker logs stock-it-backend
-```
-
 ## 🔄 자동 배포 설정
 
 ### GitHub Actions를 사용한 자동 배포
 
-#### 1. 백엔드 자동 배포
+#### 1. 백엔드 자동 배포 (Docker Compose)
 `.github/workflows/deploy-backend.yml` 파일을 생성:
 
 ```yaml
@@ -326,7 +268,7 @@ name: Deploy Backend
 on:
   push:
     branches: [main]
-    paths: ['backend/**']
+    paths: ['stockGame-be/**']
 
 jobs:
   deploy:
@@ -341,12 +283,9 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          cd /path/to/stock-it-game
+          cd /path/to/stockGame
           git pull origin main
-          cd backend
-          npm install
-          npm run build
-          pm2 restart stock-it-backend
+          docker compose up -d --build backend
 ```
 
 #### 2. 시크릿 설정
@@ -376,18 +315,7 @@ sudo chmod -R 755 /path/to/project
 ```
 
 #### 3. 메모리 부족
-```bash
-# PM2 메모리 제한 설정
-pm2 start dist/main.js --name "stock-it-backend" --max-memory-restart 300M
-```
-
-#### 4. 로그 파일 크기 제한
-```bash
-# PM2 로그 로테이션
-pm2 install pm2-logrotate
-pm2 set pm2-logrotate:max_size 10M
-pm2 set pm2-logrotate:retain 7
-```
+Docker Compose 사용 시 `docker-compose.yml`에서 해당 서비스에 `mem_limit` 등을 설정할 수 있습니다.
 
 ## 📞 지원
 

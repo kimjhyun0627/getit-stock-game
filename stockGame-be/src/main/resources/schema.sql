@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS news (
     category VARCHAR(50) NOT NULL,
     published_at TIMESTAMP(6) NULL,
     is_published TINYINT(1) NOT NULL DEFAULT 0,
+    publish_year INT NULL,
     created_at TIMESTAMP(6) NULL,
     updated_at TIMESTAMP(6) NULL
 );

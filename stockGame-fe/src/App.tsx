@@ -8,6 +8,7 @@ import Portfolio from './pages/Portfolio';
 import News from './pages/News';
 import Leaderboard from './pages/Leaderboard';
 import Admin from './pages/Admin';
+import AdminClaim from './pages/AdminClaim';
 import Login from './pages/Login';
 import KakaoCallback from './pages/KakaoCallback';
 import GoogleCallback from './pages/GoogleCallback';
@@ -120,7 +121,12 @@ function App() {
               <Route path="/portfolio" element={<ProtectedRoute user={user}><Portfolio /></ProtectedRoute>} />
               <Route path="/news" element={<News />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/admin" element={<ProtectedRoute user={user}><Admin /></ProtectedRoute>} />
+              <Route path="/admin/claim" element={<ProtectedRoute user={user}><AdminClaim user={user} /></ProtectedRoute>} />
+              <Route path="/admin" element={
+                user?.role === 'ADMIN'
+                  ? <ProtectedRoute user={user}><Admin /></ProtectedRoute>
+                  : <ProtectedRoute user={user}><AdminClaim user={user} /></ProtectedRoute>
+              } />
             </Routes>
           </PageTransition>
         </main>

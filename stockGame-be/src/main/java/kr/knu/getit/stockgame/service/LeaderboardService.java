@@ -8,7 +8,6 @@ import kr.knu.getit.stockgame.entity.User;
 import kr.knu.getit.stockgame.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,7 +70,7 @@ public class LeaderboardService {
 
         leaderboardRepository.deleteAll();
         for (LeaderboardEntry e : entries) {
-            leaderboardRepository.save(e);
+            leaderboardRepository.save(Objects.requireNonNull(e));
         }
     }
 
@@ -85,18 +84,19 @@ public class LeaderboardService {
     public List<LeaderboardDto.AdminLeaderboardResponse> getAdminLeaderboard() {
         List<LeaderboardEntry> list = leaderboardRepository.findAllByOrderByRankAsc();
         return list.stream().map(e -> {
+            LeaderboardEntry entry = Objects.requireNonNull(e);
             LeaderboardDto.AdminLeaderboardResponse r = new LeaderboardDto.AdminLeaderboardResponse();
-            r.setId(e.getId());
-            r.setUsername(e.getUsername());
-            r.setTotalAssets(e.getTotalAssets());
-            r.setCashBalance(e.getCashBalance());
-            r.setStockValue(e.getStockValue());
-            r.setRank(e.getRank());
-            r.setProfitLoss(e.getProfitLoss());
-            r.setProfitLossPercent(e.getProfitLossPercent());
-            r.setLastUpdated(e.getLastUpdated() != null ? e.getLastUpdated().toString() : null);
-            r.setIsVisible(e.getIsVisible());
-            r.setUserId(e.getUserId());
+            r.setId(entry.getId());
+            r.setUsername(entry.getUsername());
+            r.setTotalAssets(entry.getTotalAssets());
+            r.setCashBalance(entry.getCashBalance());
+            r.setStockValue(entry.getStockValue());
+            r.setRank(entry.getRank());
+            r.setProfitLoss(entry.getProfitLoss());
+            r.setProfitLossPercent(entry.getProfitLossPercent());
+            r.setLastUpdated(entry.getLastUpdated() != null ? entry.getLastUpdated().toString() : null);
+            r.setIsVisible(entry.getIsVisible());
+            r.setUserId(Objects.requireNonNull(entry.getUserId()));
             return r;
         }).collect(Collectors.toList());
     }
@@ -113,7 +113,6 @@ public class LeaderboardService {
                     e.setIsVisible(isVisible);
                     leaderboardRepository.save(e);
                 });
-        updateLeaderboard();
     }
 
     @Transactional(readOnly = true)
@@ -130,11 +129,6 @@ public class LeaderboardService {
         s.setTopAssets(top != null ? top : 0);
         s.setLastUpdated(lastUpdated != null ? lastUpdated.toString() : Instant.now().toString());
         return s;
-    }
-
-    @Scheduled(fixedRate = 300000) // 5 minutes
-    public void scheduledUpdate() {
-        updateLeaderboard();
     }
 
     private LeaderboardDto.LeaderboardResponse toResponse(LeaderboardEntry e) {

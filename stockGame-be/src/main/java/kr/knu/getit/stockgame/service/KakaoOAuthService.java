@@ -11,6 +11,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Objects;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -57,7 +59,7 @@ public class KakaoOAuthService {
         }
 
         try {
-            JsonNode node = objectMapper.readTree(response.getBody());
+            JsonNode node = objectMapper.readTree(Objects.requireNonNull(response.getBody()));
             return node.path("access_token").asText();
         } catch (Exception e) {
             throw new RuntimeException("카카오 액세스 토큰 파싱 실패", e);
@@ -66,8 +68,8 @@ public class KakaoOAuthService {
 
     public KakaoUserInfo getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+        headers.setBearerAuth(Objects.requireNonNull(accessToken));
+        HttpEntity<Void> request = new HttpEntity<>(Objects.requireNonNull(headers));
         ResponseEntity<String> response = restTemplate.exchange(
                 "https://kapi.kakao.com/v2/user/me",
                 HttpMethod.GET,

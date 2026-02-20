@@ -1,6 +1,7 @@
 package kr.knu.getit.stockgame.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
@@ -20,6 +21,7 @@ public class LeaderboardDto {
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class AdminLeaderboardResponse extends LeaderboardResponse {
         private Boolean isVisible;
         private String userId;

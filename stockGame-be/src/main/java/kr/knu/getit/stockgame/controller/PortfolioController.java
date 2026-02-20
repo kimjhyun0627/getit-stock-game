@@ -42,6 +42,7 @@ public class PortfolioController {
     public List<PortfolioDto.PortfolioResponse> getUserPortfolio(
             @AuthenticationPrincipal JwtAuthenticationFilter.AuthPrincipal principal
     ) {
+        if (principal == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증된 사용자 정보를 찾을 수 없습니다.");
         return portfolioService.getUserPortfolio(principal.id());
     }
 
@@ -49,6 +50,7 @@ public class PortfolioController {
     public List<PortfolioDto.TransactionResponse> getUserTransactions(
             @AuthenticationPrincipal JwtAuthenticationFilter.AuthPrincipal principal
     ) {
+        if (principal == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증된 사용자 정보를 찾을 수 없습니다.");
         return portfolioService.getUserTransactions(principal.id());
     }
 
@@ -56,6 +58,7 @@ public class PortfolioController {
     public PortfolioDto.BalanceResponse getBalance(
             @AuthenticationPrincipal JwtAuthenticationFilter.AuthPrincipal principal
     ) {
+        if (principal == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증된 사용자 정보를 찾을 수 없습니다.");
         return portfolioService.getUserBalance(principal.id());
     }
 
@@ -74,6 +77,7 @@ public class PortfolioController {
             @AuthenticationPrincipal JwtAuthenticationFilter.AuthPrincipal principal,
             @PathVariable String stockId
     ) {
+        if (principal == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증된 사용자 정보를 찾을 수 없습니다.");
         return portfolioService.getPortfolioByStock(principal.id(), stockId);
     }
 }

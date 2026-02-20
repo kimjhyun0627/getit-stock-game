@@ -23,8 +23,8 @@ public class NewsController {
     }
 
     @GetMapping("/published")
-    public List<NewsDto.Response> findPublished() {
-        return newsService.findPublished();
+    public List<NewsDto.Response> findPublished(@RequestParam(required = false) Integer year) {
+        return newsService.findPublished(year);
     }
 
     @GetMapping("/category/{category}")

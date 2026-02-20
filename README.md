@@ -71,22 +71,15 @@ docker compose up -d --build
 - **접속**: http://localhost (포트 80)
 - **MySQL**: localhost:3306 (root 비밀번호 기본값 `stockgame`, DB `stockgame`)
 
-환경 변수로 DB·JWT·OAuth 등을 바꿀 수 있습니다. 루트에 `.env` 예시:
+환경 변수는 **프로젝트 루트**에 `.env`를 두고 사용합니다. 예시는 `env.sample`을 참고하세요. (복사 후 `.env`로 저장해 값만 채우면 됩니다.)
 
-```env
-MYSQL_ROOT_PASSWORD=stockgame
-MYSQL_DATABASE=stockgame
-MYSQL_USER=stockgame
-MYSQL_PASSWORD=stockgame
-JWT_SECRET=your-super-secret-jwt-key-here
-FRONTEND_URL=http://localhost
-KAKAO_CLIENT_ID=...
-KAKAO_CLIENT_SECRET=...
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
+```bash
+cp env.sample .env
+# .env 편집 후
+docker compose up -d --build
 ```
 
-OAuth 콜백 URL은 `http://localhost/api/auth/kakao/callback`, `http://localhost/api/auth/google/callback` 로 설정하세요.
+OAuth 콜백 URL은 로컬 기준 `http://localhost/api/auth/kakao/callback`, `http://localhost/api/auth/google/callback` 로 설정하세요.
 
 ### 로컬 개발 (Docker 없이)
 
@@ -137,7 +130,7 @@ GOOGLE_CLIENT_SECRET=...
 
 ### 프론트엔드 환경변수
 - **Docker·배포**: 프론트엔드는 상대 경로 `/api`를 사용하므로 **.env 없이** 동작합니다. Nginx(또는 리버스 프록시)가 `/api`를 백엔드로 넘기면 됩니다.
-- **로컬 npm run dev**: 필요 시 `stockGame-fe/.env.local`에 `VITE_API_URL=/api` 등만 두면 됩니다 (Vite 프록시 사용).
+- **로컬 npm run dev**: 필요 시 `stockGame-fe/.env.local`을 만들어 `VITE_API_URL=/api` 등만 넣으면 됩니다 (없으면 코드 기본값 `/api` + Vite 프록시 사용).
 
 ## 📱 주요 페이지
 
@@ -218,10 +211,15 @@ npm run build
 # dist 폴더를 웹 서버에 업로드
 ```
 
-### Docker 배포
-- 루트의 `docker compose up -d --build`로 프론트·백엔드·MySQL을 한 번에 실행할 수 있습니다.
-- **프론트엔드**: 동일 이미지를 로컬·배포 모두 사용하며, API는 상대 경로 `/api`로 호출하므로 **배포 시 프론트 .env는 필요하지 않습니다.** 서버에서는 Nginx 등에서 `/api`를 백엔드로 프록시하면 됩니다.
-- 각 디렉토리에 Dockerfile이 포함되어 있습니다.
+### Docker 배포 (로컬·배포 동일)
+배포 서버에서도 같은 Docker Compose로 실행합니다.
+
+1. **저장소 클론** 후 프로젝트 루트로 이동
+2. **환경 변수**: `env.sample`을 복사해 `.env`로 저장하고, 배포용 값으로 수정 (DB 비밀번호, JWT_SECRET, OAuth 키, `FRONTEND_URL`·OAuth 콜백 URL을 실제 도메인으로)
+3. **실행**: `docker compose up -d --build`
+
+- **프론트엔드**: 이미지에 API 경로가 `/api`로 고정되어 있어 별도 .env 불필요. 서버 Nginx(또는 리버스 프록시)에서 `/api`만 백엔드로 넘기면 됩니다.
+- **백엔드·MySQL**: 설정은 모두 루트의 `.env`에서 읽습니다. `.env`는 Git에 넣지 마세요.
 
 ## 🧪 테스트
 
