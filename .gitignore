@@ -95,3 +95,6 @@ temp/
 # Storybook build outputs
 .out
 .storybook-out
+
+# cursor rules
+.cursorrules

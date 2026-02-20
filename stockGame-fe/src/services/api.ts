@@ -81,11 +81,11 @@ export const newsApi = {
 
 // 관리자 관련 API
 export const adminApi = {
-  getDashboard: (password: string): Promise<any> => 
+  getDashboard: (password: string): Promise<Response> =>
     apiFetch(API_CONFIG.ADMIN_ENDPOINTS.DASHBOARD, {
       headers: { 'x-admin-password': password }
     }),
-  getStatus: (password: string): Promise<any> => 
+  getStatus: (password: string): Promise<Response> =>
     apiFetch('/admin/status', {
       headers: { 'x-admin-password': password }
     }),

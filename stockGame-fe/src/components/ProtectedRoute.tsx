@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import LoginRequiredModal from './LoginRequiredModal';
 
+interface AuthUser {
+  id?: string;
+  role?: string;
+}
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  user: any;
+  user: AuthUser | null;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, user }) => {

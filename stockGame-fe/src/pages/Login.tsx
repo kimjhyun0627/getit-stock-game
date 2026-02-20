@@ -6,7 +6,7 @@ const Login: React.FC = () => {
   const handleKakaoLogin = async () => {
     try {
       // 백엔드에서 카카오 OAuth URL을 받아옴
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
       const response = await fetch(`${apiUrl}/auth/kakao/login`);
       const { url } = await response.json();
       

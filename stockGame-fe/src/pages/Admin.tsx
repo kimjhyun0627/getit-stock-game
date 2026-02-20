@@ -13,7 +13,6 @@ import {
   EyeOff
 } from 'lucide-react';
 import { apiFetch } from '../utils/api';
-import NewsModal from '../components/NewsModal';
 
 interface User {
   id: string;
@@ -105,10 +104,6 @@ const Admin: React.FC = () => {
 
   // 시간 관리
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  // 뉴스 모달
-  const [selectedNews, setSelectedNews] = useState<News | null>(null);
-  const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchData();

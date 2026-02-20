@@ -24,9 +24,9 @@ export const isMobile = (): boolean => {
 export const isTouchDevice = (): boolean => {
   if (typeof window === 'undefined') return false;
   
-  return 'ontouchstart' in window || 
-         navigator.maxTouchPoints > 0 || 
-         (navigator as any).msMaxTouchPoints > 0;
+  return 'ontouchstart' in window ||
+         navigator.maxTouchPoints > 0 ||
+         (navigator as Navigator & { msMaxTouchPoints?: number }).msMaxTouchPoints > 0;
 };
 
 // iOS 디바이스 감지
@@ -77,7 +77,8 @@ export const getViewportSize = () => {
 // 모바일 디버깅 정보 출력
 export const logMobileInfo = () => {
   if (typeof window === 'undefined') return;
-  
+
+  const navConnection = (navigator as Navigator & { connection?: { effectiveType?: string; downlink?: number } }).connection;
   console.log('📱 모바일 디바이스 정보:', {
     isMobile: isMobile(),
     isTouchDevice: isTouchDevice(),
@@ -91,9 +92,8 @@ export const logMobileInfo = () => {
       height: screen.height,
       pixelRatio: window.devicePixelRatio,
     },
-    connection: (navigator as any).connection ? {
-      effectiveType: (navigator as any).connection.effectiveType,
-      downlink: (navigator as any).connection.downlink,
-    } : 'unknown',
+    connection: navConnection
+      ? { effectiveType: navConnection.effectiveType, downlink: navConnection.downlink }
+      : 'unknown',
   });
 };

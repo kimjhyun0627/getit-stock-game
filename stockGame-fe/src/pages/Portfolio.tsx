@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { usePortfolio } from '../hooks/usePortfolio';
 import { useStockData } from '../hooks/useStockData';
-import type { PortfolioItem, Transaction } from '../types';
-import { PieChart, TrendingUp, TrendingDown, DollarSign, BarChart3, Clock, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { PieChart, TrendingUp, DollarSign, BarChart3, Clock, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const Portfolio: React.FC = () => {
   const { user, totalPortfolioValue, totalProfitLoss, loading, error, refetch } = usePortfolio();
@@ -19,10 +18,6 @@ const Portfolio: React.FC = () => {
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('ko-KR');
-  };
-
-  const formatBalance = (balance: number) => {
-    return balance.toLocaleString('ko-KR');
   };
 
   const formatDate = (dateString: string) => {

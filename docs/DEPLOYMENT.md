@@ -39,13 +39,15 @@ GOOGLE_REDIRECT_URI=https://your-backend-domain.com/api/auth/google/callback
 # GOOGLE_REDIRECT_URI=https://stockgame-be.get-it.cloud/api/auth/google/callback
 ```
 
-#### 프론트엔드 (`.env`)
+#### 프론트엔드 (`.env`) — Docker 배포 시에는 불필요
+**Docker로 배포할 때**: 프론트 이미지는 상대 경로 `/api`로 빌드되며, `.dockerignore`로 `.env`가 제외되므로 **프론트엔드 .env 없이** 배포할 수 있습니다. Nginx(또는 리버스 프록시)에서 `/api`를 백엔드로 프록시하면 됩니다.
+
+정적 빌드·GitHub Pages 등 Docker 없이 배포할 때만 아래처럼 사용합니다:
 ```bash
-# Frontend/.env
+# Frontend/.env (Docker 미사용 시에만)
 VITE_API_URL=https://your-backend-domain.com/api
 VITE_KAKAO_CLIENT_ID=your_kakao_client_id
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```gle_client_id
 ```
 
 ## ✅ 배포 전 체크리스트

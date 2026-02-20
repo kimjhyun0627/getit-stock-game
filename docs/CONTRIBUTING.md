@@ -81,10 +81,10 @@ npm run dev:backend
 - Hooks 적절히 활용
 - Props 인터페이스 명시
 
-### NestJS (백엔드)
-- 데코레이터 활용
+### Spring Boot (백엔드)
+- 컨트롤러·서비스·레포지토리 분리
 - DTO와 엔티티 분리
-- 서비스 레이어 패턴 준수
+- Bean Validation 활용
 
 ### 일반적인 규칙
 - 의미있는 변수명과 함수명

@@ -158,11 +158,6 @@ const Sell: React.FC = () => {
     return balance.toLocaleString('ko-KR');
   };
 
-  const getCurrentPrice = (stockId: string) => {
-    const portfolioItem = portfolio.find(p => p.stockId === stockId);
-    return portfolioItem?.currentPrice || 0;
-  };
-
   const calculateSellAmount = () => {
     if (!selectedItem || !selectedItem.currentPrice) return 0;
     return selectedItem.currentPrice * sellQuantity;

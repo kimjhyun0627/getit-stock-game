@@ -4,7 +4,7 @@ const GoogleLogin: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
       // 백엔드에서 구글 OAuth URL 가져오기
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
       const response = await fetch(`${apiUrl}/auth/google/login`);
       const data = await response.json();
       

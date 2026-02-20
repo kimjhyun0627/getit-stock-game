@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+*.md
+# 배포 시 프론트 .env 미사용: 아래 제외로 빌드 시 항상 ARG VITE_API_URL=/api 만 사용
+.env*
+*.log
+npm-debug.log*

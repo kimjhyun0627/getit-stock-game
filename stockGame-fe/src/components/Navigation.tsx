@@ -84,7 +84,7 @@ const Navigation: React.FC<NavigationProps> = ({ isLoggedIn, setIsLoggedIn }) =>
         await navigator.clipboard.writeText(user.id);
         setCopiedId(true);
         setTimeout(() => setCopiedId(false), 2000); // 2초 후 복사 상태 해제
-      } catch (err) {
+      } catch {
         // 클립보드 API가 지원되지 않는 경우 fallback
         const textArea = document.createElement('textarea');
         textArea.value = user.id;

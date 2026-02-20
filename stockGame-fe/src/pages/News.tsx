@@ -95,26 +95,21 @@ const News: React.FC = () => {
   useEffect(() => {
     fetchStocks();
     loadUserInfo();
-    
-    // 주기적으로 주식 데이터 업데이트 (5분마다)
+
     const interval = setInterval(fetchStocks, 5 * 60 * 1000);
-    
-    // 주식 데이터 변경 이벤트 리스너
-    const handleStocksUpdated = () => {
-      
-      fetchStocks();
-    };
-    
+    const handleStocksUpdated = () => fetchStocks();
     window.addEventListener('stocksUpdated', handleStocksUpdated);
-    
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('stocksUpdated', handleStocksUpdated);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchStocks/loadUserInfo intentionally run on mount only
   }, []);
 
   useEffect(() => {
     fetchNews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedCategory, showPublishedOnly, stocks are the logical deps
   }, [selectedCategory, showPublishedOnly, stocks]);
 
   const fetchNews = async () => {
