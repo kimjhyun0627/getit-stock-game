@@ -1,5 +1,6 @@
 package kr.knu.getit.stockgame.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,7 @@ public class UserSession {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", insertable = false, updatable = false)
+    @JsonIgnore
     private User user;
 
     @PrePersist

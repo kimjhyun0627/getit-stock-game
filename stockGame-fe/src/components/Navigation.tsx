@@ -36,14 +36,17 @@ const Navigation: React.FC<NavigationProps> = ({ isLoggedIn, setIsLoggedIn }) =>
     // 초기 로드
     loadUser();
 
-    // localStorage 변경 감지
+    // localStorage 변경 감지 (다른 탭)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'user' || e.key === 'accessToken') {
         loadUser();
       }
     };
 
-    // postMessage로부터 사용자 로그인 알림 받기
+    // 같은 탭에서 로그인 시 상태 반영 (OAuth 콜백 후 auth-change 이벤트)
+    const handleAuthChange = () => loadUser();
+
+    // postMessage로부터 사용자 로그인 알림 받기 (iframe)
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'USER_LOGIN') {
         setUser(event.data.user);
@@ -51,10 +54,12 @@ const Navigation: React.FC<NavigationProps> = ({ isLoggedIn, setIsLoggedIn }) =>
     };
 
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth-change', handleAuthChange);
     window.addEventListener('message', handleMessage);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-change', handleAuthChange);
       window.removeEventListener('message', handleMessage);
     };
   }, []);

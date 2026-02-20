@@ -1,5 +1,6 @@
 package kr.knu.getit.stockgame.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -60,6 +61,7 @@ public class User {
     private Boolean isLeaderboardVisible = true;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     @Builder.Default
     private List<UserSession> sessions = new ArrayList<>();
 

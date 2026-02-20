@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class NewsService {
 
     private final NewsRepository newsRepository;
+    private final AppConfigService appConfigService;
 
     @Transactional(readOnly = true)
     public List<NewsDto.Response> findAll() {
@@ -27,11 +28,15 @@ public class NewsService {
     }
 
     @Transactional(readOnly = true)
-    public List<NewsDto.Response> findPublished(Integer year) {
-        List<News> list = year != null
-                ? newsRepository.findPublishedByYear(year)
-                : newsRepository.findByIsPublishedTrueOrderByUpdatedAtDesc();
+    public List<NewsDto.Response> findPublished(Integer filterYear) {
+        int currentYear = appConfigService.getNewsCurrentYear();
+        List<News> list = newsRepository.findPublishedForPublic(currentYear, filterYear);
         return list.stream().map(NewsDto.Response::from).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public int getCurrentYear() {
+        return appConfigService.getNewsCurrentYear();
     }
 
     @Transactional(readOnly = true)

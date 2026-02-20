@@ -13,8 +13,8 @@ public interface NewsRepository extends JpaRepository<News, String> {
 
     List<News> findByIsPublishedTrueOrderByUpdatedAtDesc();
 
-    @Query("SELECT n FROM News n WHERE n.isPublished = true AND (n.publishYear IS NULL OR n.publishYear = :year) ORDER BY n.updatedAt DESC")
-    List<News> findPublishedByYear(@Param("year") Integer year);
+    @Query("SELECT n FROM News n WHERE n.isPublished = true AND (n.publishYear IS NULL OR n.publishYear <= :currentYear) AND (:filterYear IS NULL OR n.publishYear = :filterYear) ORDER BY n.updatedAt DESC")
+    List<News> findPublishedForPublic(@Param("currentYear") int currentYear, @Param("filterYear") Integer filterYear);
 
     List<News> findByCategoryOrderByUpdatedAtDesc(String category);
 }

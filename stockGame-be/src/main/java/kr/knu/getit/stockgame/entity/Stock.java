@@ -30,10 +30,10 @@ public class Stock {
     @Column(nullable = false)
     private Double previousPrice;
 
-    @Column(nullable = false)
+    @Column(name = "price_change", nullable = false)
     private Double change;
 
-    @Column(nullable = false)
+    @Column(name = "change_percent", nullable = false)
     private Double changePercent;
 
     @Column(nullable = false)

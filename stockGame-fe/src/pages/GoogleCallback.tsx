@@ -29,7 +29,10 @@ const GoogleCallback: React.FC = () => {
         localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('user', JSON.stringify(user));
 
-        // 부모 창에 로그인 성공 메시지 전송
+        // 같은 탭에서 로그인 상태 반영 (storage 이벤트는 다른 탭에서만 발생함)
+        window.dispatchEvent(new CustomEvent('auth-change'));
+
+        // iframe 내부인 경우 부모 창에 로그인 성공 메시지 전송
         if (window.parent !== window) {
           window.parent.postMessage({
             type: 'USER_LOGIN',

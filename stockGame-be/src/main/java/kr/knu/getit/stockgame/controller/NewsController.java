@@ -22,6 +22,11 @@ public class NewsController {
         return newsService.findAll();
     }
 
+    @GetMapping("/current-year")
+    public Map<String, Integer> getCurrentYear() {
+        return Map.of("currentYear", newsService.getCurrentYear());
+    }
+
     @GetMapping("/published")
     public List<NewsDto.Response> findPublished(@RequestParam(required = false) Integer year) {
         return newsService.findPublished(year);

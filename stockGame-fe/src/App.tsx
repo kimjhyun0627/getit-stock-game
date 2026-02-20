@@ -64,13 +64,17 @@ function App() {
       }
     };
 
-    // 이벤트 리스너 등록
+    // 같은 탭에서 로그인/로그아웃 시 상태 반영 (예: OAuth 콜백 후)
+    const handleAuthChange = () => loadUser();
+
     window.addEventListener('message', handleMessage);
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth-change', handleAuthChange);
 
     return () => {
       window.removeEventListener('message', handleMessage);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-change', handleAuthChange);
     };
   }, []);
 

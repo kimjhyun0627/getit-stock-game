@@ -52,7 +52,9 @@ export const stocksApi = {
 // 뉴스 관련 API
 export const newsApi = {
   getAll: (): Promise<News[]> => apiFetch('/news'),
-  getPublished: (): Promise<News[]> => apiFetch('/news/published'),
+  getPublished: (year?: number | null): Promise<News[]> =>
+    apiFetch(year != null ? `/news/published?year=${year}` : '/news/published'),
+  getCurrentYear: (): Promise<{ currentYear: number }> => apiFetch('/news/current-year'),
   getByCategory: (category: string): Promise<News[]> => apiFetch(`/news/category/${category}`),
   getById: (id: string): Promise<News> => apiFetch(`/news/${id}`),
   create: (data: CreateNewsDto, password: string): Promise<News> => 

@@ -1,6 +1,8 @@
 -- 시드 데이터 (mock) - 재시작 시 중복 방지를 위해 고정 ID + INSERT IGNORE
 
-INSERT IGNORE INTO stocks (id, name, symbol, current_price, previous_price, `change`, change_percent, volume, created_at, updated_at) VALUES
+INSERT IGNORE INTO app_config (config_key, config_value) VALUES ('news.current_year', CAST(YEAR(CURDATE()) AS CHAR));
+
+INSERT IGNORE INTO stocks (id, name, symbol, current_price, previous_price, price_change, change_percent, volume, created_at, updated_at) VALUES
 ('a0000001-0000-0000-0000-000000000001', 'A전자', '005930', 75000, 74500, 500, 0.67, 15000000, NOW(6), NOW(6)),
 ('a0000001-0000-0000-0000-000000000002', 'B하이닉스', '000660', 125000, 123000, 2000, 1.63, 8000000, NOW(6), NOW(6)),
 ('a0000001-0000-0000-0000-000000000003', 'NAVER', '035420', 185000, 182000, 3000, 1.65, 3000000, NOW(6), NOW(6)),

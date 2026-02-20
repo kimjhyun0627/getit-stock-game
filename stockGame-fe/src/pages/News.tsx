@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Eye, EyeOff } from 'lucide-react';
 import { apiFetch } from '../utils/api';
+import { newsApi } from '../services/api';
 import type { News as NewsType, Stock } from '../types';
 import NewsModal from '../components/NewsModal';
-
-
 
 const News: React.FC = () => {
   const navigate = useNavigate();
@@ -13,11 +12,13 @@ const News: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [showPublishedOnly, setShowPublishedOnly] = useState(true); // 일반 사용자는 기본적으로 게시된 뉴스만 보기
+  const [showPublishedOnly, setShowPublishedOnly] = useState(true);
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedNews, setSelectedNews] = useState<NewsType | null>(null);
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   // 사용자 정보 로드
   const loadUserInfo = () => {
@@ -95,6 +96,9 @@ const News: React.FC = () => {
   useEffect(() => {
     fetchStocks();
     loadUserInfo();
+    newsApi.getCurrentYear().then(({ currentYear: y }) => {
+      setCurrentYear(y);
+    }).catch(() => setCurrentYear(new Date().getFullYear()));
 
     const interval = setInterval(fetchStocks, 5 * 60 * 1000);
     const handleStocksUpdated = () => fetchStocks();
@@ -109,49 +113,39 @@ const News: React.FC = () => {
 
   useEffect(() => {
     fetchNews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedCategory, showPublishedOnly, stocks are the logical deps
-  }, [selectedCategory, showPublishedOnly, stocks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedCategory, showPublishedOnly, selectedYear, stocks are the logical deps
+  }, [selectedCategory, showPublishedOnly, selectedYear, stocks]);
 
   const fetchNews = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Admin이 아닌 경우 강제로 게시된 뉴스만 가져오기
       const shouldShowPublishedOnly = !isAdmin || showPublishedOnly;
-      
-      let endpoint = '/news';
+
+      let newsData: NewsType[];
       if (shouldShowPublishedOnly) {
-        endpoint = '/news/published';
+        newsData = await newsApi.getPublished(selectedYear ?? undefined);
+      } else {
+        const response = await apiFetch('/news');
+        newsData = await response.json();
       }
 
-      const response = await apiFetch(endpoint);
-      if (response.ok) {
-        let newsData = await response.json();
-        
-        // 주식 카테고리로 필터링 (전체가 아닌 경우)
-        if (selectedCategory !== 'all') {
-          const selectedStock = stocks.find(s => s.symbol === selectedCategory);
-          if (selectedStock) {
-            newsData = newsData.filter((item: News) => {
-              // 뉴스 제목이나 요약에 주식 이름 또는 심볼이 포함되어 있는지 확인
-              const stockName = selectedStock.name.toLowerCase();
-              const stockSymbol = selectedStock.symbol.toLowerCase();
-              const title = item.title.toLowerCase();
-              const summary = item.summary.toLowerCase();
-              
-              return title.includes(stockName) || 
-                     title.includes(stockSymbol) || 
-                     summary.includes(stockName) || 
-                     summary.includes(stockSymbol);
-            });
-          }
+      if (selectedCategory !== 'all') {
+        const selectedStock = stocks.find(s => s.symbol === selectedCategory);
+        if (selectedStock) {
+          const stockName = selectedStock.name.toLowerCase();
+          const stockSymbol = selectedStock.symbol.toLowerCase();
+          newsData = newsData.filter((item: NewsType) => {
+            const title = item.title.toLowerCase();
+            const summary = item.summary.toLowerCase();
+            return title.includes(stockName) || title.includes(stockSymbol) ||
+              summary.includes(stockName) || summary.includes(stockSymbol);
+          });
         }
-        
-        setNews(newsData);
-      } else {
-        throw new Error('뉴스를 불러오는데 실패했습니다.');
       }
+
+      setNews(newsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
@@ -245,6 +239,27 @@ const News: React.FC = () => {
                 </button>
               ))}
             </div>
+
+            {/* 기준 연도 표시 + 연도 필터 (게시된 뉴스 보기일 때) */}
+            {showPublishedOnly && (
+              <div className="flex items-center gap-3">
+                {currentYear != null && (
+                  <span className="text-sm text-gray-600">
+                    기준 연도: <strong>{currentYear}년</strong>
+                  </span>
+                )}
+                <select
+                  value={selectedYear ?? ''}
+                  onChange={(e) => setSelectedYear(e.target.value === '' ? null : Number(e.target.value))}
+                  className="px-3 py-2 rounded-lg border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">전체 연도</option>
+                  {currentYear != null && [currentYear, currentYear - 1, currentYear - 2].map((y) => (
+                    <option key={y} value={y}>{y}년</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* 게시 상태 필터 - Admin 권한이 있는 경우에만 표시 */}
             {isAdmin && (

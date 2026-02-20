@@ -4,6 +4,7 @@ import kr.knu.getit.stockgame.dto.AuthDto;
 import kr.knu.getit.stockgame.entity.User;
 import kr.knu.getit.stockgame.security.JwtAuthenticationFilter;
 import kr.knu.getit.stockgame.service.AdminService;
+import kr.knu.getit.stockgame.service.AppConfigService;
 import kr.knu.getit.stockgame.service.AuthService;
 import kr.knu.getit.stockgame.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class AdminController {
     private final AdminService adminService;
     private final UserService userService;
     private final AuthService authService;
+    private final AppConfigService appConfigService;
 
     @Value("${app.admin-password:}")
     private String adminPassword;
@@ -71,5 +73,20 @@ public class AdminController {
     @PostMapping("/backup")
     public Map<String, Object> backup() {
         return adminService.backupData();
+    }
+
+    @GetMapping("/settings/news-current-year")
+    public Map<String, Integer> getNewsCurrentYear() {
+        return Map.of("currentYear", appConfigService.getNewsCurrentYear());
+    }
+
+    @PutMapping("/settings/news-current-year")
+    public Map<String, Integer> setNewsCurrentYear(@RequestBody Map<String, Integer> body) {
+        Integer year = body != null ? body.get("currentYear") : null;
+        if (year == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "currentYear가 필요합니다.");
+        }
+        appConfigService.setNewsCurrentYear(year);
+        return Map.of("currentYear", appConfigService.getNewsCurrentYear());
     }
 }

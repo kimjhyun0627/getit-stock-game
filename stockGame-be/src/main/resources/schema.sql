@@ -1,5 +1,6 @@
 -- stockgame MySQL 스키마 (Docker/MySQL 프로필용)
 -- Hibernate ddl-auto=none 일 때 사용. 테이블이 없을 때만 생성.
+-- 기존 stocks 테이블에 change 컬럼이 있다면: ALTER TABLE stocks CHANGE `change` price_change DOUBLE NOT NULL;
 
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS stocks (
     symbol VARCHAR(255) NOT NULL UNIQUE,
     current_price DOUBLE NOT NULL,
     previous_price DOUBLE NOT NULL,
-    `change` DOUBLE NOT NULL,
+    price_change DOUBLE NOT NULL,
     change_percent DOUBLE NOT NULL,
     volume BIGINT NOT NULL,
     created_at TIMESTAMP(6) NULL,
@@ -75,6 +76,11 @@ CREATE TABLE IF NOT EXISTS transactions (
     created_at TIMESTAMP(6) NULL,
     CONSTRAINT fk_tx_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_tx_stock FOREIGN KEY (stock_id) REFERENCES stocks(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS app_config (
+    config_key VARCHAR(100) NOT NULL PRIMARY KEY,
+    config_value VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS leaderboard_entries (

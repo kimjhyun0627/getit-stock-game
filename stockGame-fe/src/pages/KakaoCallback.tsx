@@ -19,8 +19,11 @@ const KakaoCallback: React.FC = () => {
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('user', JSON.stringify(user));
-        
-        window.parent.postMessage({ type: 'USER_LOGIN', user }, '*');
+
+        window.dispatchEvent(new CustomEvent('auth-change'));
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'USER_LOGIN', user }, '*');
+        }
         
         setStatus('success');
         setMessage('로그인 성공! 메인 페이지로 이동합니다.');
