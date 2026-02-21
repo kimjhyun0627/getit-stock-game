@@ -24,11 +24,8 @@ public class Stock {
     @Column(unique = true, nullable = false)
     private String symbol;
 
-    @Column(nullable = false)
+    @Transient
     private Double currentPrice;
-
-    @Column(nullable = false)
-    private Double previousPrice;
 
     @Column(name = "price_change", nullable = false)
     private Double change;
@@ -54,16 +51,6 @@ public class Stock {
     @PreUpdate
     void preUpdate() {
         updatedAt = Instant.now();
-    }
-
-    public void updatePrice(double newPrice) {
-        this.previousPrice = this.currentPrice;
-        this.currentPrice = newPrice;
-        this.change = this.currentPrice - this.previousPrice;
-        this.changePercent = this.previousPrice != 0
-                ? (this.change / this.previousPrice) * 100
-                : 0;
-        this.updatedAt = Instant.now();
     }
 
     public void updateVolume(long newVolume) {

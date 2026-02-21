@@ -2,6 +2,8 @@ package kr.knu.getit.stockgame.service;
 
 import kr.knu.getit.stockgame.dto.StockDto;
 import kr.knu.getit.stockgame.entity.Stock;
+import kr.knu.getit.stockgame.entity.StockPriceHistory;
+import kr.knu.getit.stockgame.repository.StockPriceHistoryRepository;
 import kr.knu.getit.stockgame.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -18,16 +21,61 @@ import java.util.List;
 public class StockService {
 
     private final StockRepository stockRepository;
+    private final StockPriceHistoryRepository stockPriceHistoryRepository;
+    private final AppConfigService appConfigService;
 
     @Transactional(readOnly = true)
     public List<Stock> findAll() {
-        return stockRepository.findAll();
+        int currentYear = appConfigService.getNewsCurrentYear();
+        List<Stock> stocks = stockRepository.findAll();
+        for (Stock stock : stocks) {
+            applyYearPrice(stock, currentYear);
+        }
+        return stocks;
     }
 
     @Transactional(readOnly = true)
     public Stock findOne(String id) {
-        return stockRepository.findById(id)
+        Stock stock = stockRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ID " + id + "인 주식을 찾을 수 없습니다."));
+        applyYearPrice(stock, appConfigService.getNewsCurrentYear());
+        return stock;
+    }
+
+    private void applyYearPrice(Stock stock, int currentYear) {
+        Optional<StockPriceHistory> currentOpt = stockPriceHistoryRepository.findByStockIdAndYear(stock.getId(), currentYear);
+        Optional<StockPriceHistory> previousOpt = stockPriceHistoryRepository.findByStockIdAndYear(stock.getId(), currentYear - 1);
+        if (currentOpt.isPresent()) {
+            double price = currentOpt.get().getPrice();
+            stock.setCurrentPrice(price);
+            if (previousOpt.isPresent()) {
+                double prevPrice = previousOpt.get().getPrice();
+                double ch = price - prevPrice;
+                stock.setChange(ch);
+                stock.setChangePercent(prevPrice != 0 ? (ch / prevPrice) * 100 : 0);
+            } else {
+                stock.setChange(0.0);
+                stock.setChangePercent(0.0);
+            }
+        } else {
+            stock.setCurrentPrice(0.0);
+            stock.setChange(0.0);
+            stock.setChangePercent(0.0);
+        }
+    }
+
+    private void upsertPriceHistory(String stockId, int year, double price) {
+        Optional<StockPriceHistory> opt = stockPriceHistoryRepository.findByStockIdAndYear(stockId, year);
+        if (opt.isPresent()) {
+            opt.get().setPrice(price);
+            stockPriceHistoryRepository.save(opt.get());
+        } else {
+            stockPriceHistoryRepository.save(StockPriceHistory.builder()
+                    .stockId(stockId)
+                    .year(year)
+                    .price(price)
+                    .build());
+        }
     }
 
     @Transactional
@@ -41,19 +89,28 @@ public class StockService {
         Stock stock = Stock.builder()
                 .name(dto.getName())
                 .symbol(dto.getSymbol())
-                .currentPrice(dto.getCurrentPrice())
-                .previousPrice(dto.getCurrentPrice())
                 .change(0.0)
                 .changePercent(0.0)
                 .volume(dto.getVolume() != null ? dto.getVolume() : 0L)
                 .build();
-        return stockRepository.save(stock);
+        stock = stockRepository.save(stock);
+        int currentYear = appConfigService.getNewsCurrentYear();
+        stockPriceHistoryRepository.save(StockPriceHistory.builder()
+                .stockId(stock.getId())
+                .year(currentYear)
+                .price(dto.getCurrentPrice())
+                .build());
+        applyYearPrice(stock, currentYear);
+        return stock;
     }
 
     @Transactional
     public Stock update(String id, StockDto.Update dto) {
         Stock stock = findOne(id);
-        if (dto.getCurrentPrice() != null) stock.updatePrice(dto.getCurrentPrice());
+        if (dto.getCurrentPrice() != null) {
+            upsertPriceHistory(stock.getId(), appConfigService.getNewsCurrentYear(), dto.getCurrentPrice());
+            applyYearPrice(stock, appConfigService.getNewsCurrentYear());
+        }
         if (dto.getVolume() != null) stock.updateVolume(dto.getVolume());
         if (dto.getName() != null) stock.setName(dto.getName());
         if (dto.getSymbol() != null) stock.setSymbol(dto.getSymbol());
@@ -63,8 +120,9 @@ public class StockService {
     @Transactional
     public Stock updatePrice(String id, StockDto.UpdatePrice dto) {
         Stock stock = findOne(id);
-        stock.updatePrice(dto.getCurrentPrice());
-        return stockRepository.save(stock);
+        upsertPriceHistory(stock.getId(), appConfigService.getNewsCurrentYear(), dto.getCurrentPrice());
+        applyYearPrice(stock, appConfigService.getNewsCurrentYear());
+        return stock;
     }
 
     @Transactional
@@ -82,12 +140,16 @@ public class StockService {
 
     @Transactional
     public void simulatePriceChanges() {
-        List<Stock> stocks = findAll();
+        int currentYear = appConfigService.getNewsCurrentYear();
+        List<Stock> stocks = stockRepository.findAll();
         for (Stock stock : stocks) {
+            Optional<StockPriceHistory> opt = stockPriceHistoryRepository.findByStockIdAndYear(stock.getId(), currentYear);
+            if (opt.isEmpty()) continue;
+            double currentPrice = opt.get().getPrice();
             double changePercent = (Math.random() - 0.5) * 0.1;
-            long newPrice = Math.round(stock.getCurrentPrice() * (1 + changePercent));
-            stock.updatePrice(newPrice);
-            stockRepository.save(stock);
+            double newPrice = Math.round(currentPrice * (1 + changePercent));
+            opt.get().setPrice(newPrice);
+            stockPriceHistoryRepository.save(opt.get());
         }
     }
 

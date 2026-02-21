@@ -84,6 +84,9 @@ const Admin: React.FC = () => {
   // 주식 관리
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
   const [showStockForm, setShowStockForm] = useState(false);
+  const [priceHistoryStock, setPriceHistoryStock] = useState<Stock | null>(null);
+  const [priceHistoryRows, setPriceHistoryRows] = useState<{ year: number; price: number }[]>([]);
+  const [savingPriceHistory, setSavingPriceHistory] = useState(false);
   const [stockFormData, setStockFormData] = useState<StockFormData>({
     name: '',
     symbol: '',
@@ -107,6 +110,11 @@ const Admin: React.FC = () => {
 
   // 시간 관리
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [gameStartYear, setGameStartYear] = useState<number | null>(null);
+  const [gameEndYear, setGameEndYear] = useState<number | null>(null);
+  const [gameStartYearInput, setGameStartYearInput] = useState('');
+  const [gameEndYearInput, setGameEndYearInput] = useState('');
+  const [savingGamePeriod, setSavingGamePeriod] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -117,12 +125,13 @@ const Admin: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersRes, stocksRes, newsRes, leaderboardRes, yearRes] = await Promise.all([
+      const [usersRes, stocksRes, newsRes, leaderboardRes, yearRes, gamePeriodRes] = await Promise.all([
         apiFetch('/users'),
         apiFetch('/stocks'),
         apiFetch('/news'),
         apiFetch('/leaderboard/admin'),
-        apiFetch('/admin/settings/news-current-year').catch(() => null)
+        apiFetch('/admin/settings/news-current-year').catch(() => null),
+        apiFetch('/admin/settings/game-period').catch(() => null)
       ]);
 
       const usersData = await usersRes.json();
@@ -133,6 +142,13 @@ const Admin: React.FC = () => {
         const yearData = await yearRes.json();
         setNewsCurrentYear(yearData.currentYear);
         setNewsCurrentYearInput(String(yearData.currentYear));
+      }
+      if (gamePeriodRes != null && gamePeriodRes.ok) {
+        const periodData = await gamePeriodRes.json();
+        setGameStartYear(periodData.startYear);
+        setGameEndYear(periodData.endYear);
+        setGameStartYearInput(String(periodData.startYear));
+        setGameEndYearInput(String(periodData.endYear));
       }
       
       setUsers(usersData || []);
@@ -477,7 +493,34 @@ const Admin: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900">{stock.name}</h3>
                         <p className="text-sm text-gray-500">{stock.symbol}</p>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          onClick={async () => {
+                            setPriceHistoryStock(stock);
+                            try {
+                              const res = await apiFetch(`/admin/stocks/${stock.id}/price-history`);
+                              const data = await res.json();
+                              const existing = (data.prices || []) as { year: number; price: number }[];
+                              const start = gameStartYear ?? 2022;
+                              const end = gameEndYear ?? 2026;
+                              const rows = [];
+                              for (let y = start; y <= end; y++) {
+                                const found = existing.find((p: { year: number }) => p.year === y);
+                                rows.push({ year: y, price: found ? found.price : 0 });
+                              }
+                              setPriceHistoryRows(rows);
+                            } catch {
+                              const start = gameStartYear ?? 2022;
+                              const end = gameEndYear ?? 2026;
+                              setPriceHistoryRows(
+                                Array.from({ length: end - start + 1 }, (_, i) => ({ year: start + i, price: 0 }))
+                              );
+                            }
+                          }}
+                          className="text-amber-600 hover:text-amber-800 text-xs px-2 py-1 border border-amber-300 rounded"
+                        >
+                          연도별 가격
+                        </button>
                         <button
                           onClick={() => setEditingStock(stock)}
                           className="text-blue-600 hover:text-blue-800"
@@ -523,55 +566,6 @@ const Admin: React.FC = () => {
                   <Plus className="w-4 h-4" />
                   <span>뉴스 추가</span>
                 </button>
-              </div>
-
-              <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">뉴스 기준 연도</h3>
-                <p className="text-xs text-gray-500 mb-3">
-                  이 연도보다 이후로 설정된 뉴스는 비공개, 이 연도·이전 연도 뉴스는 공개됩니다.
-                </p>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="2000"
-                    max="2100"
-                    value={newsCurrentYearInput}
-                    onChange={(e) => setNewsCurrentYearInput(e.target.value)}
-                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                  />
-                  <span className="text-gray-600">년</span>
-                  <button
-                    disabled={savingYear}
-                    onClick={async () => {
-                      const y = parseInt(newsCurrentYearInput, 10);
-                      if (Number.isNaN(y) || y < 2000 || y > 2100) {
-                        setError('2000~2100 사이 연도를 입력하세요.');
-                        return;
-                      }
-                      setSavingYear(true);
-                      try {
-                        const res = await apiFetch('/admin/settings/news-current-year', {
-                          method: 'PUT',
-                          body: JSON.stringify({ currentYear: y }),
-                        });
-                        const data = await res.json();
-                        setNewsCurrentYear(data.currentYear);
-                        setNewsCurrentYearInput(String(data.currentYear));
-                        setError(null);
-                      } catch {
-                        setError('기준 연도 저장에 실패했습니다.');
-                      } finally {
-                        setSavingYear(false);
-                      }
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
-                  >
-                    {savingYear ? '저장 중…' : '저장'}
-                  </button>
-                  {newsCurrentYear != null && (
-                    <span className="text-sm text-gray-500">현재 적용: {newsCurrentYear}년</span>
-                  )}
-                </div>
               </div>
 
               <div className="space-y-4">
@@ -654,6 +648,120 @@ const Admin: React.FC = () => {
                       <span className="text-sm text-green-700">뉴스:</span>
                       <span className="text-sm font-medium text-green-800">{news.length}개</span>
                     </div>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">현재 연도</h3>
+                  <p className="text-sm text-blue-800 mb-4">
+                    이 연도에 따라 주식 표시 가격(연도별 가격)과 뉴스 공개 여부가 결정됩니다. 총 진행 연도 범위 내로 설정하세요.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      type="number"
+                      min="2000"
+                      max="2100"
+                      value={newsCurrentYearInput}
+                      onChange={(e) => setNewsCurrentYearInput(e.target.value)}
+                      className="w-24 px-3 py-2 border border-blue-300 rounded-lg text-sm"
+                    />
+                    <span className="text-blue-800">년</span>
+                    <button
+                      disabled={savingYear}
+                      onClick={async () => {
+                        const y = parseInt(newsCurrentYearInput, 10);
+                        if (Number.isNaN(y) || y < 2000 || y > 2100) {
+                          setError('2000~2100 사이 연도를 입력하세요.');
+                          return;
+                        }
+                        setSavingYear(true);
+                        try {
+                          const res = await apiFetch('/admin/settings/news-current-year', {
+                            method: 'PUT',
+                            body: JSON.stringify({ currentYear: y }),
+                          });
+                          const data = await res.json();
+                          setNewsCurrentYear(data.currentYear);
+                          setNewsCurrentYearInput(String(data.currentYear));
+                          setError(null);
+                        } catch {
+                          setError('현재 연도 저장에 실패했습니다.');
+                        } finally {
+                          setSavingYear(false);
+                        }
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                    >
+                      {savingYear ? '저장 중…' : '저장'}
+                    </button>
+                    {newsCurrentYear != null && (
+                      <span className="text-sm text-blue-700">현재 적용: {newsCurrentYear}년</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 bg-amber-50 border border-amber-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-amber-900 mb-2">주식 게임 총 진행 연도</h3>
+                  <p className="text-sm text-amber-800 mb-4">
+                    게임에서 사용하는 연도 범위(예: 2022~2026). 뉴스 범위 및 이후 주가 이력 기능에 사용됩니다.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      type="number"
+                      min="2000"
+                      max="2100"
+                      value={gameStartYearInput}
+                      onChange={(e) => setGameStartYearInput(e.target.value)}
+                      className="w-24 px-3 py-2 border border-amber-300 rounded-lg text-sm"
+                    />
+                    <span className="text-amber-800 font-medium">~</span>
+                    <input
+                      type="number"
+                      min="2000"
+                      max="2100"
+                      value={gameEndYearInput}
+                      onChange={(e) => setGameEndYearInput(e.target.value)}
+                      className="w-24 px-3 py-2 border border-amber-300 rounded-lg text-sm"
+                    />
+                    <span className="text-amber-800">년</span>
+                    <button
+                      disabled={savingGamePeriod}
+                      onClick={async () => {
+                        const start = parseInt(gameStartYearInput, 10);
+                        const end = parseInt(gameEndYearInput, 10);
+                        if (Number.isNaN(start) || Number.isNaN(end) || start < 2000 || start > 2100 || end < 2000 || end > 2100) {
+                          setError('시작·종료 연도를 2000~2100 사이로 입력하세요.');
+                          return;
+                        }
+                        if (start > end) {
+                          setError('시작 연도는 종료 연도보다 크지 않아야 합니다.');
+                          return;
+                        }
+                        setSavingGamePeriod(true);
+                        try {
+                          const res = await apiFetch('/admin/settings/game-period', {
+                            method: 'PUT',
+                            body: JSON.stringify({ startYear: start, endYear: end }),
+                          });
+                          const data = await res.json();
+                          setGameStartYear(data.startYear);
+                          setGameEndYear(data.endYear);
+                          setGameStartYearInput(String(data.startYear));
+                          setGameEndYearInput(String(data.endYear));
+                          setError(null);
+                        } catch {
+                          setError('총 진행 연도 저장에 실패했습니다.');
+                        } finally {
+                          setSavingGamePeriod(false);
+                        }
+                      }}
+                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 text-sm"
+                    >
+                      {savingGamePeriod ? '저장 중…' : '저장'}
+                    </button>
+                    {gameStartYear != null && gameEndYear != null && (
+                      <span className="text-sm text-amber-700">현재 적용: {gameStartYear}년 ~ {gameEndYear}년</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -878,6 +986,65 @@ const Admin: React.FC = () => {
               </button>
               <button
                 onClick={() => setEditingStock(null)}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 연도별 가격 모달 */}
+      {priceHistoryStock && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-auto">
+            <h3 className="text-lg font-semibold mb-2">연도별 가격 · {priceHistoryStock.name}</h3>
+            <p className="text-sm text-gray-500 mb-4">총 진행 연도 범위 내 가격을 입력하세요.</p>
+            <div className="space-y-2 mb-6">
+              {priceHistoryRows.map((row, idx) => (
+                <div key={row.year} className="flex items-center gap-3">
+                  <span className="w-14 text-sm font-medium text-gray-700">{row.year}년</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={row.price || ''}
+                    onChange={(e) => {
+                      const next = [...priceHistoryRows];
+                      next[idx] = { ...next[idx], price: Number(e.target.value) || 0 };
+                      setPriceHistoryRows(next);
+                    }}
+                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  />
+                  <span className="text-sm text-gray-500">원</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button
+                disabled={savingPriceHistory}
+                onClick={async () => {
+                  setSavingPriceHistory(true);
+                  try {
+                    await apiFetch(`/admin/stocks/${priceHistoryStock.id}/price-history`, {
+                      method: 'PUT',
+                      body: JSON.stringify({ prices: priceHistoryRows }),
+                    });
+                    setPriceHistoryStock(null);
+                    setError(null);
+                  } catch {
+                    setError('연도별 가격 저장에 실패했습니다.');
+                  } finally {
+                    setSavingPriceHistory(false);
+                  }
+                }}
+                className="flex-1 bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 disabled:opacity-50"
+              >
+                {savingPriceHistory ? '저장 중…' : '저장'}
+              </button>
+              <button
+                onClick={() => { setPriceHistoryStock(null); setError(null); }}
                 className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
               >
                 취소

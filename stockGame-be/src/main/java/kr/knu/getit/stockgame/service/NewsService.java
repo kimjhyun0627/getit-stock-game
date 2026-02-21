@@ -30,13 +30,30 @@ public class NewsService {
     @Transactional(readOnly = true)
     public List<NewsDto.Response> findPublished(Integer filterYear) {
         int currentYear = appConfigService.getNewsCurrentYear();
-        List<News> list = newsRepository.findPublishedForPublic(currentYear, filterYear);
+        int startYear = appConfigService.getGameStartYear();
+        int endYear = appConfigService.getGameEndYear();
+        Integer clampedYear = null;
+        if (filterYear != null) {
+            int y = Math.max(startYear, Math.min(endYear, filterYear));
+            clampedYear = y;
+        }
+        List<News> list = newsRepository.findPublishedForPublic(currentYear, clampedYear);
         return list.stream().map(NewsDto.Response::from).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public int getCurrentYear() {
         return appConfigService.getNewsCurrentYear();
+    }
+
+    @Transactional(readOnly = true)
+    public int getGameStartYear() {
+        return appConfigService.getGameStartYear();
+    }
+
+    @Transactional(readOnly = true)
+    public int getGameEndYear() {
+        return appConfigService.getGameEndYear();
     }
 
     @Transactional(readOnly = true)

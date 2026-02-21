@@ -55,6 +55,7 @@ export const newsApi = {
   getPublished: (year?: number | null): Promise<News[]> =>
     apiFetch(year != null ? `/news/published?year=${year}` : '/news/published'),
   getCurrentYear: (): Promise<{ currentYear: number }> => apiFetch('/news/current-year'),
+  getGamePeriod: (): Promise<{ startYear: number; endYear: number }> => apiFetch('/news/game-period'),
   getByCategory: (category: string): Promise<News[]> => apiFetch(`/news/category/${category}`),
   getById: (id: string): Promise<News> => apiFetch(`/news/${id}`),
   create: (data: CreateNewsDto, password: string): Promise<News> => 

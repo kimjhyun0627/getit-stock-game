@@ -22,6 +22,7 @@ public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
     private final TransactionRepository transactionRepository;
     private final StockRepository stockRepository;
+    private final StockService stockService;
     private final UserRepository userRepository;
 
     @Transactional
@@ -120,8 +121,12 @@ public class PortfolioService {
     public List<PortfolioDto.PortfolioResponse> getUserPortfolio(String userId) {
         List<Portfolio> list = portfolioRepository.findByUserIdOrderByUpdatedAtDesc(userId);
         return list.stream().map(p -> {
-            Stock s = stockRepository.findById(Objects.requireNonNull(p).getStockId()).orElse(null);
-            if (s == null) return null;
+            Stock s;
+            try {
+                s = stockService.findOne(Objects.requireNonNull(p).getStockId());
+            } catch (ResponseStatusException e) {
+                return null;
+            }
             double currentPrice = s.getCurrentPrice();
             double totalValue = p.getQuantity() * currentPrice;
             double profitLoss = (currentPrice - p.getAveragePrice()) * p.getQuantity();

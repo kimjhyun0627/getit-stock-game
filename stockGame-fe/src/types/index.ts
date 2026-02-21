@@ -4,7 +4,6 @@ export interface Stock {
   name: string;
   symbol: string;
   currentPrice: number;
-  previousPrice: number;
   change: number;
   changePercent: number;
   volume: number;

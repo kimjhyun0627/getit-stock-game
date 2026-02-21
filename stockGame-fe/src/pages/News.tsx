@@ -18,6 +18,8 @@ const News: React.FC = () => {
   const [selectedNews, setSelectedNews] = useState<NewsType | null>(null);
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [gameStartYear, setGameStartYear] = useState<number | null>(null);
+  const [gameEndYear, setGameEndYear] = useState<number | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   // 사용자 정보 로드
@@ -99,6 +101,10 @@ const News: React.FC = () => {
     newsApi.getCurrentYear().then(({ currentYear: y }) => {
       setCurrentYear(y);
     }).catch(() => setCurrentYear(new Date().getFullYear()));
+    newsApi.getGamePeriod().then(({ startYear, endYear }) => {
+      setGameStartYear(startYear);
+      setGameEndYear(endYear);
+    }).catch(() => {});
 
     const interval = setInterval(fetchStocks, 5 * 60 * 1000);
     const handleStocksUpdated = () => fetchStocks();
@@ -240,12 +246,12 @@ const News: React.FC = () => {
               ))}
             </div>
 
-            {/* 기준 연도 표시 + 연도 필터 (게시된 뉴스 보기일 때) */}
+            {/* 현재 연도 표시 + 연도 필터 (게시된 뉴스 보기일 때) */}
             {showPublishedOnly && (
               <div className="flex items-center gap-3">
                 {currentYear != null && (
                   <span className="text-sm text-gray-600">
-                    기준 연도: <strong>{currentYear}년</strong>
+                    현재 연도: <strong>{currentYear}년</strong>
                   </span>
                 )}
                 <select
@@ -254,9 +260,11 @@ const News: React.FC = () => {
                   className="px-3 py-2 rounded-lg border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">전체 연도</option>
-                  {currentYear != null && [currentYear, currentYear - 1, currentYear - 2].map((y) => (
-                    <option key={y} value={y}>{y}년</option>
-                  ))}
+                  {gameStartYear != null && gameEndYear != null &&
+                    Array.from({ length: gameEndYear - gameStartYear + 1 }, (_, i) => gameEndYear - i).map((y) => (
+                      <option key={y} value={y}>{y}년</option>
+                    ))
+                  }
                 </select>
               </div>
             )}

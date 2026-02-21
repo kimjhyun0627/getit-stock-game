@@ -27,6 +27,14 @@ public class NewsController {
         return Map.of("currentYear", newsService.getCurrentYear());
     }
 
+    @GetMapping("/game-period")
+    public Map<String, Integer> getGamePeriod() {
+        return Map.of(
+                "startYear", newsService.getGameStartYear(),
+                "endYear", newsService.getGameEndYear()
+        );
+    }
+
     @GetMapping("/published")
     public List<NewsDto.Response> findPublished(@RequestParam(required = false) Integer year) {
         return newsService.findPublished(year);

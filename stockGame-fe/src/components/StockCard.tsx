@@ -122,7 +122,7 @@ const StockCard: React.FC<StockCardProps> = ({ stock, onClick }) => {
         {/* 추가 정보 */}
         <div className="pt-4 border-t border-gray-100">
           <div className="flex justify-between text-xs text-gray-500">
-            <span>전일가: {formatPrice(stock.previousPrice)}원</span>
+            <span>전일가: {formatPrice(stock.currentPrice - stock.change)}원</span>
             <span className={`font-medium ${
               isPositive ? 'text-green-600' : 
               isNegative ? 'text-red-600' : 

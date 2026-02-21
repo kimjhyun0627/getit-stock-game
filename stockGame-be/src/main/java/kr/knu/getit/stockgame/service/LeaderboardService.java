@@ -26,12 +26,12 @@ public class LeaderboardService {
     private final LeaderboardEntryRepository leaderboardRepository;
     private final UserRepository userRepository;
     private final PortfolioRepository portfolioRepository;
-    private final StockRepository stockRepository;
+    private final StockService stockService;
 
     @Transactional
     public void updateLeaderboard() {
         List<User> users = userRepository.findAll();
-        Map<String, Double> prices = stockRepository.findAll().stream()
+        Map<String, Double> prices = stockService.findAll().stream()
                 .collect(Collectors.toMap(Stock::getId, Stock::getCurrentPrice));
 
         List<LeaderboardEntry> entries = new ArrayList<>();

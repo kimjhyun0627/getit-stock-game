@@ -2,6 +2,7 @@ package kr.knu.getit.stockgame.controller;
 
 import kr.knu.getit.stockgame.dto.StockDto;
 import kr.knu.getit.stockgame.entity.Stock;
+import kr.knu.getit.stockgame.service.StockPriceHistoryService;
 import kr.knu.getit.stockgame.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class StockController {
 
     private final StockService stockService;
+    private final StockPriceHistoryService stockPriceHistoryService;
 
     @GetMapping
     public List<Stock> findAll() {
@@ -25,6 +27,14 @@ public class StockController {
     @GetMapping("/{id}")
     public Stock findOne(@PathVariable String id) {
         return stockService.findOne(id);
+    }
+
+    @GetMapping("/{id}/price-history")
+    public Map<String, Object> getPriceHistory(@PathVariable String id) {
+        return Map.of(
+                "stockId", id,
+                "prices", stockPriceHistoryService.getByStockId(id)
+        );
     }
 
     @PostMapping
