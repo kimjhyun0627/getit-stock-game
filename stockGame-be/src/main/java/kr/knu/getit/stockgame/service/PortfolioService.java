@@ -32,6 +32,13 @@ public class PortfolioService {
         Stock stock = Objects.requireNonNull(stockRepository.findById(order.getStockId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다.")));
 
+        double currentYearPrice = stockService.getCurrentYearPrice(order.getStockId())
+                .map(p -> p != null ? p : 0.0)
+                .orElse(0.0);
+        if (currentYearPrice <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "상장폐지 종목은 매수할 수 없습니다.");
+        }
+
         double totalCost = order.getPrice() * order.getQuantity();
         if (user.getBalance().doubleValue() < totalCost) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잔고가 부족합니다.");

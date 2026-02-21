@@ -1,172 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch } from '../utils/api';
 import { TrendingDown, AlertCircle, CheckCircle, DollarSign } from 'lucide-react';
+import { useSell } from '../hooks/useSell';
 
-interface PortfolioItem {
-  stockId: string;
-  stockName: string;
-  symbol: string;
-  quantity: number;
-  averagePrice: number;
-  currentPrice: number;
-  totalValue: number;
-  profitLoss: number;
-  profitLossPercent: number;
-}
-
-interface User {
-  id: string;
-  name: string;
-  balance: number;
-}
+const formatPrice = (price: number) => price.toLocaleString('ko-KR');
+const formatBalance = (balance: number) => balance.toLocaleString('ko-KR');
 
 const Sell: React.FC = () => {
   const navigate = useNavigate();
-  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
-  const [user, setUser] = useState<User | null>(null);
-  const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
-  const [sellQuantity, setSellQuantity] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    fetchPortfolio();
-    fetchUserInfo();
-  }, []);
-
-  const fetchPortfolio = async () => {
-    try {
-      const response = await apiFetch('/portfolios');
-      if (response.ok) {
-        const portfolioData = await response.json();
-
-        setPortfolio(portfolioData);
-      }
-    } catch (error) {
-      console.error('포트폴리오를 가져오는데 실패했습니다:', error);
-    }
-  };
-
-  const fetchUserInfo = async () => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const userData = JSON.parse(userStr);
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error('사용자 정보를 가져오는데 실패했습니다:', error);
-    }
-  };
-
-  const handleItemSelect = (item: PortfolioItem) => {
-    setSelectedItem(item);
-    setSellQuantity(1);
-  };
-
-  const handleQuantityChange = (value: number) => {
-    if (!selectedItem) return;
-    const newQuantity = Math.max(1, Math.min(selectedItem.quantity, sellQuantity + value));
-    setSellQuantity(newQuantity);
-  };
-
-  const handleSell = async () => {
-    if (!selectedItem) {
-      setError('매도할 주식을 선택해주세요.');
-      return;
-    }
-
-    if (!selectedItem.currentPrice || selectedItem.currentPrice <= 0) {
-      setError('주식 가격 정보를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
-      return;
-    }
-    
-    // JWT 토큰 확인
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      setError('로그인이 필요합니다. 다시 로그인해주세요.');
-      navigate('/login');
-      return;
-    }
-    
-    try {
-      setError('');
-      setIsLoading(true);
-      
-      const response = await apiFetch('/portfolios/sell', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          stockId: selectedItem.stockId,
-          quantity: sellQuantity,
-          price: selectedItem.currentPrice,
-        }),
-      });
-
-      if (response.ok) {
-        await response.json();
-        setShowSuccess(true);
-        
-        // 사용자 잔고 업데이트
-        if (user) {
-          const sellAmount = selectedItem.currentPrice * sellQuantity;
-          const newBalance = user.balance + sellAmount;
-          setUser({ ...user, balance: newBalance });
-          localStorage.setItem('user', JSON.stringify({ ...user, balance: newBalance }));
-        }
-        
-        // 포트폴리오 새로고침
-        await fetchPortfolio();
-        
-        // 2초 후 포트폴리오로 이동
-        setTimeout(() => {
-          navigate('/portfolio');
-        }, 1500);
-      } else {
-        const errorData = await response.json();
-        if (response.status === 401) {
-          setError('로그인이 만료되었습니다. 다시 로그인해주세요.');
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          navigate('/login');
-        } else {
-          setError(`매도 실패: ${errorData.message || '알 수 없는 오류가 발생했습니다.'}`);
-        }
-      }
-    } catch (err) {
-      console.error('매도 중 오류 발생:', err);
-      if (err instanceof Error && err.message.includes('인증이 만료')) {
-        navigate('/login');
-      } else {
-        setError(err instanceof Error ? err.message : '매도 중 오류가 발생했습니다.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('ko-KR');
-  };
-
-  const formatBalance = (balance: number) => {
-    return balance.toLocaleString('ko-KR');
-  };
-
-  const calculateSellAmount = () => {
-    if (!selectedItem || !selectedItem.currentPrice) return 0;
-    return selectedItem.currentPrice * sellQuantity;
-  };
-
-  const calculateProfitLoss = () => {
-    if (!selectedItem || !selectedItem.currentPrice) return 0;
-    return (selectedItem.currentPrice - selectedItem.averagePrice) * sellQuantity;
-  };
+  const {
+    portfolio,
+    user,
+    selectedItem,
+    sellQuantity,
+    setSellQuantity,
+    isLoading,
+    showSuccess,
+    error,
+    handleItemSelect,
+    handleQuantityChange,
+    handleSell,
+    sellAmount,
+    profitLoss,
+  } = useSell();
 
   if (portfolio.length === 0) {
     return (
@@ -195,7 +51,6 @@ const Sell: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* 헤더 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center space-x-3 mb-4">
             <div className="p-3 bg-red-100 rounded-lg">
@@ -206,8 +61,6 @@ const Sell: React.FC = () => {
               <p className="text-gray-600">보유한 주식을 판매하세요</p>
             </div>
           </div>
-          
-          {/* 잔액 정보 */}
           {user && (
             <div className="bg-blue-50 rounded-lg p-4">
               <div className="flex justify-between items-center">
@@ -221,16 +74,19 @@ const Sell: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 보유 주식 목록 */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">보유 주식</h2>
             <div className="space-y-3">
               {portfolio.map((item) => {
                 const currentPrice = item.currentPrice || 0;
-                const profitLoss = currentPrice > 0 ? (currentPrice - item.averagePrice) * item.quantity : 0;
-                const profitLossPercent = currentPrice > 0 && item.averagePrice > 0 ? 
-                  ((currentPrice - item.averagePrice) / item.averagePrice) * 100 : 0;
-                
+                const pl =
+                  currentPrice > 0
+                    ? (currentPrice - item.averagePrice) * item.quantity
+                    : 0;
+                const plPercent =
+                  currentPrice > 0 && item.averagePrice > 0
+                    ? ((currentPrice - item.averagePrice) / item.averagePrice) * 100
+                    : 0;
                 return (
                   <div
                     key={item.stockId}
@@ -245,7 +101,6 @@ const Sell: React.FC = () => {
                       <h3 className="font-semibold text-gray-900">{item.stockName}</h3>
                       <span className="text-sm text-gray-500">{item.quantity}주</span>
                     </div>
-                    
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
                         <span className="text-gray-600">평균 매수가:</span>
@@ -259,20 +114,26 @@ const Sell: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-gray-600">수익/손실:</span>
-                        <span className={`ml-2 font-medium ${
-                          profitLoss > 0 ? 'text-green-600' : 
-                          profitLoss < 0 ? 'text-red-600' : 'text-gray-600'
-                        }`}>
-                          {profitLoss > 0 ? '+' : ''}{formatPrice(profitLoss)}원
+                        <span
+                          className={`ml-2 font-medium ${
+                            pl > 0 ? 'text-green-600' : pl < 0 ? 'text-red-600' : 'text-gray-600'
+                          }`}
+                        >
+                          {pl > 0 ? '+' : ''}{formatPrice(pl)}원
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">수익률:</span>
-                        <span className={`ml-2 font-medium ${
-                          profitLossPercent > 0 ? 'text-green-600' : 
-                          profitLossPercent < 0 ? 'text-red-600' : 'text-gray-600'
-                        }`}>
-                          {profitLossPercent > 0 ? '+' : ''}{profitLossPercent.toFixed(2)}%
+                        <span
+                          className={`ml-2 font-medium ${
+                            plPercent > 0
+                              ? 'text-green-600'
+                              : plPercent < 0
+                                ? 'text-red-600'
+                                : 'text-gray-600'
+                          }`}
+                        >
+                          {plPercent > 0 ? '+' : ''}{plPercent.toFixed(2)}%
                         </span>
                       </div>
                     </div>
@@ -282,13 +143,10 @@ const Sell: React.FC = () => {
             </div>
           </div>
 
-          {/* 매도 폼 */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">매도 정보</h2>
-            
             {selectedItem ? (
               <>
-                {/* 선택된 주식 정보 */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
                   <h3 className="font-semibold text-gray-900 mb-3">{selectedItem.stockName}</h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
@@ -298,28 +156,31 @@ const Sell: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-gray-600">평균 매수가:</span>
-                      <span className="ml-2 font-medium">{formatPrice(selectedItem.averagePrice)}원</span>
+                      <span className="ml-2 font-medium">
+                        {formatPrice(selectedItem.averagePrice)}원
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-600">현재가:</span>
                       <span className="ml-2 font-medium">
-                        {selectedItem.currentPrice > 0 ? `${formatPrice(selectedItem.currentPrice)}원` : '가격 정보 없음'}
+                        {selectedItem.currentPrice > 0
+                          ? `${formatPrice(selectedItem.currentPrice)}원`
+                          : '가격 정보 없음'}
                       </span>
                     </div>
                     <div>
                       <span className="text-gray-600">총 보유 가치:</span>
                       <span className="ml-2 font-medium">
-                        {selectedItem.currentPrice > 0 ? `${formatPrice(selectedItem.quantity * selectedItem.currentPrice)}원` : '계산 불가'}
-                      </span>pages 한
+                        {selectedItem.currentPrice > 0
+                          ? `${formatPrice(selectedItem.quantity * selectedItem.currentPrice)}원`
+                          : '계산 불가'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 매도 수량 */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    매도 수량
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">매도 수량</label>
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
@@ -333,7 +194,14 @@ const Sell: React.FC = () => {
                       type="number"
                       inputMode="numeric"
                       value={sellQuantity}
-                      onChange={(e) => setSellQuantity(Math.max(1, Math.min(selectedItem.quantity, parseInt(e.target.value) || 1)))}
+                      onChange={(e) =>
+                        setSellQuantity(
+                          Math.max(
+                            1,
+                            Math.min(selectedItem.quantity, parseInt(e.target.value) || 1),
+                          ),
+                        )
+                      }
                       min="1"
                       max={selectedItem.quantity}
                       className="w-20 min-h-[44px] text-center border border-gray-300 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -353,38 +221,52 @@ const Sell: React.FC = () => {
                   </p>
                 </div>
 
-                {/* 매도 정보 요약 */}
                 <div className="bg-blue-50 rounded-lg p-4 mb-6">
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-blue-800">매도 금액</span>
-                      <span className="font-semibold text-blue-900">{formatPrice(calculateSellAmount())}원</span>
+                      <span className="font-semibold text-blue-900">
+                        {formatPrice(sellAmount)}원
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-blue-800">예상 수익/손실</span>
-                      <span className={`font-semibold ${
-                        calculateProfitLoss() > 0 ? 'text-green-600' : 
-                        calculateProfitLoss() < 0 ? 'text-red-600' : 'text-blue-900'
-                      }`}>
-                        {calculateProfitLoss() > 0 ? '+' : ''}{formatPrice(calculateProfitLoss())}원
+                      <span
+                        className={`font-semibold ${
+                          profitLoss > 0
+                            ? 'text-green-600'
+                            : profitLoss < 0
+                              ? 'text-red-600'
+                              : 'text-blue-900'
+                        }`}
+                      >
+                        {profitLoss > 0 ? '+' : ''}{formatPrice(profitLoss)}원
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 매도 버튼 */}
                 <button
                   type="button"
                   onClick={handleSell}
-                  disabled={isLoading || !selectedItem?.currentPrice || selectedItem.currentPrice <= 0}
+                  disabled={
+                    isLoading ||
+                    !selectedItem?.currentPrice ||
+                    selectedItem.currentPrice <= 0
+                  }
                   className={`w-full min-h-[48px] py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 touch-manipulation active:scale-[0.98] ${
-                    isLoading || !selectedItem?.currentPrice || selectedItem.currentPrice <= 0
-                      ? 'bg-gray-400 cursor-not-allowed' 
+                    isLoading ||
+                    !selectedItem?.currentPrice ||
+                    selectedItem.currentPrice <= 0
+                      ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl sm:hover:scale-[1.02] sm:hover:-translate-y-0.5'
                   }`}
                 >
-                  {isLoading ? '매도 처리 중...' : 
-                   !selectedItem?.currentPrice || selectedItem.currentPrice <= 0 ? '가격 정보 없음' : '매도하기'}
+                  {isLoading
+                    ? '매도 처리 중...'
+                    : !selectedItem?.currentPrice || selectedItem.currentPrice <= 0
+                      ? '가격 정보 없음'
+                      : '매도하기'}
                 </button>
               </>
             ) : (
@@ -396,7 +278,6 @@ const Sell: React.FC = () => {
           </div>
         </div>
 
-        {/* 성공 메시지 */}
         {showSuccess && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center mt-6">
             <div className="flex items-center justify-center space-x-2 text-green-800">
@@ -407,7 +288,6 @@ const Sell: React.FC = () => {
           </div>
         )}
 
-        {/* 에러 메시지 */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center mt-6">
             <div className="flex items-center justify-center space-x-2 text-red-800">

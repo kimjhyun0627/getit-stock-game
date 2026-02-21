@@ -42,6 +42,13 @@ public class StockService {
         return stock;
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Double> getCurrentYearPrice(String stockId) {
+        int year = appConfigService.getNewsCurrentYear();
+        return stockPriceHistoryRepository.findByStockIdAndYear(stockId, year)
+                .map(StockPriceHistory::getPrice);
+    }
+
     private void applyYearPrice(Stock stock, int currentYear) {
         Optional<StockPriceHistory> currentOpt = stockPriceHistoryRepository.findByStockIdAndYear(stock.getId(), currentYear);
         Optional<StockPriceHistory> previousOpt = stockPriceHistoryRepository.findByStockIdAndYear(stock.getId(), currentYear - 1);

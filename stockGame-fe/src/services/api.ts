@@ -1,52 +1,31 @@
 import { API_CONFIG } from '../config/api';
 import type { Stock, News, CreateStockDto, UpdateStockDto, CreateNewsDto, UpdateNewsDto } from '../types';
+import { apiFetch } from '../utils/api';
 
-const API_BASE_URL = API_CONFIG.BASE_URL;
+const json = <T>(r: Awaited<ReturnType<typeof apiFetch>>): Promise<T> => r.json();
 
-// 공통 fetch 함수
-const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
-
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
-
-  return response.json();
-};
-
-// 주식 관련 API
 export const stocksApi = {
-  getAll: (): Promise<Stock[]> => apiFetch('/stocks'),
-  getById: (id: string): Promise<Stock> => apiFetch(`/stocks/${id}`),
-  create: (data: CreateStockDto, password: string): Promise<Stock> => 
+  getAll: (): Promise<Stock[]> => apiFetch('/stocks').then(json<Stock[]>),
+  getById: (id: string): Promise<Stock> => apiFetch(`/stocks/${id}`).then(json<Stock>),
+  create: (data: CreateStockDto, password: string): Promise<Stock> =>
     apiFetch('/stocks', {
       method: 'POST',
       body: JSON.stringify(data),
-      headers: { 'x-admin-password': password }
-    }),
-  update: (id: string, data: UpdateStockDto, password: string): Promise<Stock> => 
+      headers: { 'x-admin-password': password },
+    }).then(json<Stock>),
+  update: (id: string, data: UpdateStockDto, password: string): Promise<Stock> =>
     apiFetch(`/stocks/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
-      headers: { 'x-admin-password': password }
-    }),
-  delete: (id: string, password: string): Promise<void> => 
-    apiFetch(`/stocks/${id}`, {
-      method: 'DELETE',
-      headers: { 'x-admin-password': password }
-    }),
-  simulatePrices: (password: string): Promise<void> => 
+      headers: { 'x-admin-password': password },
+    }).then(json<Stock>),
+  delete: (id: string, password: string): Promise<void> =>
+    apiFetch(`/stocks/${id}`, { method: 'DELETE', headers: { 'x-admin-password': password } }).then(() => undefined),
+  simulatePrices: (password: string): Promise<void> =>
     apiFetch('/stocks/simulate', {
       method: 'POST',
-      headers: { 'x-admin-password': password }
-    }),
+      headers: { 'x-admin-password': password },
+    }).then(() => undefined),
 };
 
 /** 뉴스 공통 정렬: 공개 연도 내림차순 → 신뢰도(전년도 결산, 상, 중, 하, 전체공개) → 카테고리순 (관리자/일반 동일) */
@@ -69,58 +48,50 @@ export function sortNews(list: News[]): News[] {
   });
 }
 
-// 뉴스 관련 API
 export const newsApi = {
-  getAll: (): Promise<News[]> => apiFetch('/news'),
+  getAll: (): Promise<News[]> => apiFetch('/news').then(json<News[]>),
   getPublished: (year?: number | null): Promise<News[]> =>
-    apiFetch(year != null ? `/news/published?year=${year}` : '/news/published').then((data: News[]) => sortNews(data)),
-  getCurrentYear: (): Promise<{ currentYear: number }> => apiFetch('/news/current-year'),
-  getGamePeriod: (): Promise<{ startYear: number; endYear: number }> => apiFetch('/news/game-period'),
-  getByCategory: (category: string): Promise<News[]> => apiFetch(`/news/category/${category}`),
-  getById: (id: string): Promise<News> => apiFetch(`/news/${id}`),
-  create: (data: CreateNewsDto, password: string): Promise<News> => 
+    apiFetch(year != null ? `/news/published?year=${year}` : '/news/published')
+      .then(json<News[]>)
+      .then(sortNews),
+  getCurrentYear: (): Promise<{ currentYear: number }> =>
+    apiFetch('/news/current-year').then(json<{ currentYear: number }>),
+  getGamePeriod: (): Promise<{ startYear: number; endYear: number }> =>
+    apiFetch('/news/game-period').then(json<{ startYear: number; endYear: number }>),
+  getByCategory: (category: string): Promise<News[]> => apiFetch(`/news/category/${category}`).then(json<News[]>),
+  getById: (id: string): Promise<News> => apiFetch(`/news/${id}`).then(json<News>),
+  create: (data: CreateNewsDto, password: string): Promise<News> =>
     apiFetch('/news', {
       method: 'POST',
       body: JSON.stringify(data),
-      headers: { 'x-admin-password': password }
-    }),
-  update: (id: string, data: UpdateNewsDto, password: string): Promise<News> => 
+      headers: { 'x-admin-password': password },
+    }).then(json<News>),
+  update: (id: string, data: UpdateNewsDto, password: string): Promise<News> =>
     apiFetch(`/news/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
-      headers: { 'x-admin-password': password }
-    }),
-  delete: (id: string, password: string): Promise<void> => 
-    apiFetch(`/news/${id}`, {
-      method: 'DELETE',
-      headers: { 'x-admin-password': password }
-    }),
-  publish: (id: string, password: string): Promise<News> => 
-    apiFetch(`/news/${id}/publish`, {
-      method: 'PUT',
-      headers: { 'x-admin-password': password }
-    }),
+      headers: { 'x-admin-password': password },
+    }).then(json<News>),
+  delete: (id: string, password: string): Promise<void> =>
+    apiFetch(`/news/${id}`, { method: 'DELETE', headers: { 'x-admin-password': password } }).then(() => undefined),
+  publish: (id: string, password: string): Promise<News> =>
+    apiFetch(`/news/${id}/publish`, { method: 'PUT', headers: { 'x-admin-password': password } }).then(json<News>),
 };
 
-// 관리자 관련 API
 export const adminApi = {
-  getDashboard: (password: string): Promise<Response> =>
-    apiFetch(API_CONFIG.ADMIN_ENDPOINTS.DASHBOARD, {
-      headers: { 'x-admin-password': password }
-    }),
-  getStatus: (password: string): Promise<Response> =>
-    apiFetch('/admin/status', {
-      headers: { 'x-admin-password': password }
-    }),
-  simulateStocks: (password: string): Promise<void> => 
+  getDashboard: (password: string) =>
+    apiFetch(API_CONFIG.ADMIN_ENDPOINTS.DASHBOARD, { headers: { 'x-admin-password': password } }),
+  getStatus: (password: string) =>
+    apiFetch('/admin/status', { headers: { 'x-admin-password': password } }),
+  simulateStocks: (password: string): Promise<void> =>
     apiFetch(API_CONFIG.ADMIN_ENDPOINTS.STOCKS_SIMULATE, {
       method: 'POST',
-      headers: { 'x-admin-password': password }
-    }),
-  backup: (password: string): Promise<void> => 
+      headers: { 'x-admin-password': password },
+    }).then(() => undefined),
+  backup: (password: string): Promise<void> =>
     apiFetch(API_CONFIG.ADMIN_ENDPOINTS.BACKUP, {
       method: 'POST',
-      headers: { 'x-admin-password': password }
-    }),
+      headers: { 'x-admin-password': password },
+    }).then(() => undefined),
 };
 

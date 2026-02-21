@@ -49,7 +49,7 @@ export const usePortfolio = () => {
   }, []);
 
   // 주식 매수
-  const buyStock = async (stockId: string, stockName: string, quantity: number, price: number) => {
+  const buyStock = async (stockId: string, stockName: string, symbol: string, quantity: number, price: number) => {
     const totalAmount = quantity * price;
     
     if (totalAmount > user.balance) {
@@ -60,11 +60,12 @@ export const usePortfolio = () => {
       id: Date.now().toString(),
       stockId,
       stockName,
+      symbol,
       type: 'buy',
       quantity,
       price,
       totalAmount,
-      date: new Date().toISOString()
+      createdAt: new Date().toISOString()
     };
 
     // 기존 포트폴리오 아이템 찾기
@@ -95,6 +96,7 @@ export const usePortfolio = () => {
       const newItem: PortfolioItem = {
         stockId,
         stockName,
+        symbol,
         quantity,
         averagePrice: price,
         currentPrice: price,
@@ -127,11 +129,12 @@ export const usePortfolio = () => {
       id: Date.now().toString(),
       stockId,
       stockName: existingItem.stockName,
+      symbol: existingItem.symbol,
       type: 'sell',
       quantity,
       price,
       totalAmount,
-      date: new Date().toISOString()
+      createdAt: new Date().toISOString()
     };
 
     let newPortfolio: PortfolioItem[];

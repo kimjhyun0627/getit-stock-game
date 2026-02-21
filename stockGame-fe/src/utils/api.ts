@@ -1,8 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+import { API_CONFIG } from '../config/api';
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('accessToken');
-  
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
@@ -12,7 +12,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });
