@@ -90,7 +90,7 @@ public class NewsService {
         }
         if (dto.content() != null) news.setContent(dto.content());
         if (dto.category() != null) news.setCategory(dto.category());
-        news.setPublishYear(dto.publishYear());
+        if (dto.publishYear() != null) news.setPublishYear(dto.publishYear());
         if (dto.reliability() != null) news.setReliability(dto.reliability());
         return newsRepository.save(news);
     }
