@@ -8,7 +8,6 @@ import Portfolio from './pages/Portfolio';
 import News from './pages/News';
 import Leaderboard from './pages/Leaderboard';
 import Admin from './pages/Admin';
-import AdminClaim from './pages/AdminClaim';
 import Login from './pages/Login';
 import KakaoCallback from './pages/KakaoCallback';
 import GoogleCallback from './pages/GoogleCallback';
@@ -18,6 +17,17 @@ import './App.css';
 
 // 모바일 디바이스 감지 유틸리티
 import { logMobileInfo, isMobile } from './utils/mobile-detection';
+
+function AdminAccessDenied() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center p-4">
+      <div className="text-center text-gray-600">
+        <p className="text-lg font-medium">관리자 권한이 없습니다.</p>
+        <p className="text-sm mt-1">이 페이지에 접근할 수 없습니다.</p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [showUserModal, setShowUserModal] = useState(false);
@@ -125,11 +135,10 @@ function App() {
               <Route path="/portfolio" element={<ProtectedRoute user={user}><Portfolio /></ProtectedRoute>} />
               <Route path="/news" element={<News />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/admin/claim" element={<ProtectedRoute user={user}><AdminClaim user={user} /></ProtectedRoute>} />
               <Route path="/admin" element={
                 user?.role === 'ADMIN'
                   ? <ProtectedRoute user={user}><Admin /></ProtectedRoute>
-                  : <ProtectedRoute user={user}><AdminClaim user={user} /></ProtectedRoute>
+                  : <ProtectedRoute user={user}><AdminAccessDenied /></ProtectedRoute>
               } />
             </Routes>
           </PageTransition>

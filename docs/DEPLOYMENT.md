@@ -60,7 +60,7 @@ docker compose up -d --build
 ```bash
 # 프로젝트 루트에서
 cp env.sample .env
-# .env 편집 (DB, JWT, OAuth, ADMIN_PASSWORD 등)
+# .env 편집 (DB, JWT, OAuth 등)
 docker compose up -d --build
 ```
 
@@ -74,7 +74,7 @@ mvn package -DskipTests
 java -jar target/stockgame-be-1.0.0.jar
 ```
 
-환경 변수로 `PORT`, `JWT_SECRET`, `DB_*`, `FRONTEND_URL`, `ADMIN_PASSWORD` 등을 설정합니다.
+환경 변수로 `PORT`, `JWT_SECRET`, `DB_*`, `FRONTEND_URL` 등을 설정합니다.
 
 ### 방법 3: Nginx 리버스 프록시
 

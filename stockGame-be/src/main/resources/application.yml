@@ -33,4 +33,3 @@ app:
     client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
     redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:3000/api/auth/google/callback}
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
-  admin-password: ${ADMIN_PASSWORD:}
