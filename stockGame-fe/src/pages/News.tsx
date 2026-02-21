@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { apiFetch } from '../utils/api';
 import { newsApi } from '../services/api';
 import type { News as NewsType, Stock } from '../types';
@@ -142,11 +142,11 @@ const News: React.FC = () => {
         if (selectedStock) {
           const stockName = selectedStock.name.toLowerCase();
           const stockSymbol = selectedStock.symbol.toLowerCase();
+          const contentLower = (s: string) => (s ?? '').toLowerCase();
           newsData = newsData.filter((item: NewsType) => {
-            const title = item.title.toLowerCase();
-            const summary = item.summary.toLowerCase();
-            return title.includes(stockName) || title.includes(stockSymbol) ||
-              summary.includes(stockName) || summary.includes(stockSymbol);
+            const categoryMatch = item.category === selectedCategory;
+            const text = contentLower(item.content);
+            return categoryMatch || text.includes(stockName) || text.includes(stockSymbol);
           });
         }
       }
@@ -157,16 +157,6 @@ const News: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   const getCategoryColor = (category: string) => {
@@ -310,53 +300,33 @@ const News: React.FC = () => {
                 onClick={() => handleNewsClick(item)}
               >
                 <div className="p-6">
-                  {/* 카테고리 및 상태 */}
+                  {/* 카테고리 및 신뢰도 */}
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center flex-wrap gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getCategoryColor(item.category)}`}>
                         {getCategoryLabel(item.category)}
                       </span>
-                      {/* 주식 관련 표시 */}
-                      {item.category !== 'economy' && item.category !== 'technology' && item.category !== 'politics' && item.category !== 'sports' && (
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                          주식 관련
+                      {item.reliability && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                          신뢰도: {item.reliability === 'HIGH' ? '상' : item.reliability === 'MEDIUM' ? '중' : item.reliability === 'LOW' ? '하' : item.reliability === 'ALL' ? '전체 공개' : item.reliability === 'YEAR_END' ? '전년도 결산' : item.reliability}
                         </span>
                       )}
                     </div>
-                    {/* Admin 권한이 있는 경우에만 게시 상태 표시 */}
                     {isAdmin && (
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        item.isPublished 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                         {item.isPublished ? '게시됨' : '임시저장'}
                       </span>
                     )}
                   </div>
 
-                  {/* 제목 */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {item.title}
-                  </h3>
-
-                  {/* 요약 */}
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                    {item.summary}
+                  {/* 내용 미리보기 */}
+                  <p className="text-gray-900 font-medium text-sm mb-2 line-clamp-2">
+                    {item.content}
                   </p>
 
-                  {/* 메타 정보 */}
+                  {/* 메타: 공개 연도만 */}
                   <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>{formatDate(item.createdAt)}</span>
-                    </div>
-                    {item.publishedAt && (
-                      <div className="flex items-center space-x-1">
-                        <Eye className="w-3 h-3" />
-                        <span>{formatDate(item.publishedAt)}</span>
-                      </div>
-                    )}
+                    <span>공개 연도: {item.publishYear != null ? `${item.publishYear}년` : '미설정'}</span>
                   </div>
                 </div>
               </div>

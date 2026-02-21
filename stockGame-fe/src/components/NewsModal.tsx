@@ -4,12 +4,11 @@ import { X } from 'lucide-react';
 interface NewsModalProps {
   news: {
     id: string;
-    title: string;
-    summary: string;
     content: string;
     category: string;
     isPublished: boolean;
-    publishedAt?: string;
+    publishYear?: number | null;
+    reliability?: string | null;
     createdAt: string;
     updatedAt: string;
   } | null;
@@ -43,15 +42,18 @@ const NewsModal: React.FC<NewsModalProps> = ({ news, isOpen, onClose }) => {
           <div className="relative z-10">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
               <div className="flex-1 sm:pr-4 md:pr-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 md:mb-4 leading-tight">{news.title}</h2>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 md:mb-4 leading-tight line-clamp-2">{news.content}</h2>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   <span className="bg-white/20 backdrop-blur-sm text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium border border-white/30">
                     {news.category === 'all' ? '전체' : news.category}
                   </span>
+                  {news.reliability && (
+                    <span className="bg-amber-500/20 text-amber-100 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium border border-amber-400/30">
+                      신뢰도: {news.reliability === 'HIGH' ? '상' : news.reliability === 'MEDIUM' ? '중' : news.reliability === 'LOW' ? '하' : news.reliability === 'ALL' ? '전체 공개' : news.reliability === 'YEAR_END' ? '전년도 결산' : news.reliability}
+                    </span>
+                  )}
                   <span className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium border ${
-                    news.isPublished 
-                      ? 'bg-green-500/20 text-green-100 border-green-400/30' 
-                      : 'bg-yellow-500/20 text-yellow-100 border-yellow-400/30'
+                    news.isPublished ? 'bg-green-500/20 text-green-100 border-green-400/30' : 'bg-yellow-500/20 text-yellow-100 border-yellow-400/30'
                   }`}>
                     {news.isPublished ? '📢 게시됨' : '📝 임시저장'}
                   </span>
@@ -67,49 +69,20 @@ const NewsModal: React.FC<NewsModalProps> = ({ news, isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* 요약 섹션 */}
-        {news.summary && (
-          <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50/30">
-            <div className="flex items-center mb-3 md:mb-4">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
-                <span className="text-blue-600 text-base sm:text-lg">📋</span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">요약</h3>
-            </div>
-            <p className="text-gray-700 leading-relaxed text-base sm:text-lg pl-8 sm:pl-11">{news.summary}</p>
-          </div>
-        )}
-
         {/* 본문 내용 */}
         <div className="p-4 sm:p-6 md:p-8">
-          <div className="flex items-center mb-4 md:mb-6">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
-              <span className="text-purple-600 text-base sm:text-lg">📄</span>
-            </div>
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">내용</h3>
-          </div>
-          <div className="prose max-w-none pl-8 sm:pl-11">
-            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm sm:text-base bg-gray-50 p-3 sm:p-4 md:p-6 rounded-xl border border-gray-100">
-              {news.content}
-            </div>
+          <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm sm:text-base bg-gray-50 p-3 sm:p-4 md:p-6 rounded-xl border border-gray-100">
+            {news.content}
           </div>
         </div>
 
-        {/* 푸터 - 메타 정보 */}
+        {/* 푸터 - 공개 연도만 */}
         <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 bg-gradient-to-r from-gray-50 to-blue-50/30 border-t border-gray-100">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-            <div className="flex items-center space-x-3 sm:space-x-6 text-xs sm:text-sm text-gray-600">
-              {news.publishedAt && (
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span className="font-medium">게시일:</span> 
-                  <span className="text-gray-800">{formatDate(news.publishedAt)}</span>
-                </div>
-              )}
+            <div className="text-xs sm:text-sm text-gray-600">
+              공개 연도: {news.publishYear != null ? `${news.publishYear}년` : '미설정'}
             </div>
-            <div className="flex items-center space-x-2 text-gray-500">
-              <span className="text-xs">📰 뉴스 ID: {news.id.slice(0, 8)}...</span>
-            </div>
+            <span className="text-xs text-gray-500">📰 뉴스 ID: {news.id.slice(0, 8)}...</span>
           </div>
         </div>
       </div>

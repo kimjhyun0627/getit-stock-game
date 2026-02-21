@@ -12,12 +12,11 @@ export interface Stock {
 // 뉴스 관련 타입
 export interface News {
   id: string;
-  title: string;
-  summary: string;
   content: string;
-  category: 'economy' | 'technology' | 'politics' | 'sports';
+  category: string;
   isPublished: boolean;
-  publishedAt?: string;
+  publishYear?: number | null;
+  reliability?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,17 +72,19 @@ export interface UpdateStockDto {
 }
 
 export interface CreateNewsDto {
-  title: string;
-  summary: string;
   content: string;
-  category: 'economy' | 'technology' | 'politics' | 'sports';
+  category: string;
+  isPublished?: boolean;
+  publishYear?: number | null;
+  reliability?: string | null;
 }
 
 export interface UpdateNewsDto {
-  title?: string;
-  summary?: string;
   content?: string;
-  category?: 'economy' | 'technology' | 'politics' | 'sports';
+  category?: string;
+  isPublished?: boolean;
+  publishYear?: number | null;
+  reliability?: string | null;
 }
 
 export interface PublishNewsDto {

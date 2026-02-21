@@ -40,12 +40,13 @@ CREATE TABLE IF NOT EXISTS stocks (
     updated_at TIMESTAMP(6) NULL
 );
 
+-- 기존 news 테이블 마이그레이션: ALTER TABLE news ADD COLUMN reliability VARCHAR(20) NULL;
+-- 기존 news: UPDATE news SET content = CONCAT(COALESCE(title,''), '\n', COALESCE(summary,''), '\n', content); ALTER TABLE news DROP COLUMN title, DROP COLUMN summary;
 CREATE TABLE IF NOT EXISTS news (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    summary VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     category VARCHAR(50) NOT NULL,
+    reliability VARCHAR(20) NULL,
     published_at TIMESTAMP(6) NULL,
     is_published TINYINT(1) NOT NULL DEFAULT 0,
     publish_year INT NULL,

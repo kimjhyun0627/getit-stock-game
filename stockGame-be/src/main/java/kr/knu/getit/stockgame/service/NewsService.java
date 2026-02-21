@@ -72,12 +72,11 @@ public class NewsService {
     @Transactional
     public News create(NewsDto.Create dto) {
         News news = News.builder()
-                .title(dto.title())
-                .summary(dto.summary())
                 .content(dto.content())
                 .category(dto.category())
                 .isPublished(Boolean.TRUE.equals(dto.isPublished()))
                 .publishYear(dto.publishYear())
+                .reliability(dto.reliability())
                 .build();
         return newsRepository.save(news);
     }
@@ -89,11 +88,10 @@ public class NewsService {
             if (dto.isPublished()) news.publish();
             else news.unpublish();
         }
-        if (dto.title() != null) news.setTitle(dto.title());
-        if (dto.summary() != null) news.setSummary(dto.summary());
         if (dto.content() != null) news.setContent(dto.content());
         if (dto.category() != null) news.setCategory(dto.category());
-        if (dto.publishYear() != null) news.setPublishYear(dto.publishYear());
+        news.setPublishYear(dto.publishYear());
+        if (dto.reliability() != null) news.setReliability(dto.reliability());
         return newsRepository.save(news);
     }
 

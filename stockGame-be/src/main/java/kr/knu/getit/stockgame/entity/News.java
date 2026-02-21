@@ -18,17 +18,14 @@ public class News {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column(nullable = false)
-    private String summary;
-
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @Column(length = 50, nullable = false)
     private String category;
+
+    @Column(length = 20, nullable = true)
+    private String reliability;
 
     private Instant publishedAt;
 

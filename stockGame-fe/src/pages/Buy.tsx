@@ -1,7 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import { TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+
+interface PricePoint {
+  year: number;
+  price: number;
+}
+
+const PAD = 32;
+
+function PriceLineChart({ data, width, height }: { data: PricePoint[]; width: string; height: number }) {
+  if (data.length < 2) return null;
+  const minYear = Math.min(...data.map((d) => d.year));
+  const maxYear = Math.max(...data.map((d) => d.year));
+  const minPrice = Math.min(...data.map((d) => d.price));
+  const maxPrice = Math.max(...data.map((d) => d.price));
+  const rangeYear = maxYear - minYear || 1;
+  const rangePrice = maxPrice - minPrice || 1;
+  const w = 400;
+  const h = height - PAD * 2;
+  const points = data
+    .map((d) => {
+      const x = PAD + ((d.year - minYear) / rangeYear) * (w - PAD * 2);
+      const y = PAD + h - ((d.price - minPrice) / rangePrice) * h;
+      return `${x},${y}`;
+    })
+    .join(' ');
+  return (
+    <svg viewBox={`0 0 ${w + PAD * 2} ${height}`} className="w-full" style={{ maxHeight: height }} preserveAspectRatio="xMidYMid meet">
+      <polyline
+        fill="none"
+        stroke="rgb(34, 197, 94)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+      {data.map((d, i) => {
+        const x = PAD + ((d.year - minYear) / rangeYear) * (w - PAD * 2);
+        const y = PAD + h - ((d.price - minPrice) / rangePrice) * h;
+        return (
+          <g key={d.year}>
+            <circle cx={x} cy={y} r="4" fill="rgb(34, 197, 94)" />
+            <text x={x} y={height - 4} textAnchor="middle" fontSize="10" fill="#6b7280">
+              {d.year}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
 
 interface Stock {
   id: string;
@@ -28,11 +78,50 @@ const Buy: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string>('');
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [priceHistory, setPriceHistory] = useState<PricePoint[]>([]);
 
   useEffect(() => {
     fetchStocks();
     fetchUserInfo();
   }, []);
+
+  useEffect(() => {
+    const fetchCurrentYear = async () => {
+      try {
+        const res = await apiFetch('/news/current-year');
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentYear(data.currentYear ?? null);
+        }
+      } catch {
+        setCurrentYear(null);
+      }
+    };
+    fetchCurrentYear();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedStock) {
+      setPriceHistory([]);
+      return;
+    }
+    const fetchPriceHistory = async () => {
+      try {
+        const res = await apiFetch(`/stocks/${selectedStock}/price-history`);
+        if (res.ok) {
+          const data = await res.json();
+          const list: PricePoint[] = Array.isArray(data.prices) ? data.prices : [];
+          setPriceHistory(list);
+        } else {
+          setPriceHistory([]);
+        }
+      } catch {
+        setPriceHistory([]);
+      }
+    };
+    fetchPriceHistory();
+  }, [selectedStock]);
 
   const fetchStocks = async () => {
     try {
@@ -151,6 +240,14 @@ const Buy: React.FC = () => {
   const totalAmount = selectedStockData ? selectedStockData.currentPrice * quantity : 0;
   const canAfford = user ? totalAmount <= user.balance : false;
 
+  const chartData = useMemo(() => {
+    if (currentYear == null || priceHistory.length === 0) return [];
+    const filtered = priceHistory
+      .filter((p) => p.year <= currentYear)
+      .sort((a, b) => a.year - b.year);
+    return filtered;
+  }, [currentYear, priceHistory]);
+
   const formatPrice = (price: number) => {
     return price.toLocaleString('ko-KR');
   };
@@ -224,10 +321,10 @@ const Buy: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-600">전일대비</p>
                   <p className={`font-semibold ${
-                    selectedStockData.change > 0 ? 'text-green-600' : 
+                    selectedStockData.change > 0 ? 'text-green-600' :
                     selectedStockData.change < 0 ? 'text-red-600' : 'text-gray-600'
                   }`}>
-                    {selectedStockData.change > 0 ? '+' : ''}{formatPrice(selectedStockData.change)}원 
+                    {selectedStockData.change > 0 ? '+' : ''}{formatPrice(selectedStockData.change)}원
                     ({selectedStockData.changePercent > 0 ? '+' : ''}{selectedStockData.changePercent.toFixed(2)}%)
                   </p>
                 </div>
@@ -235,6 +332,16 @@ const Buy: React.FC = () => {
                   <p className="text-sm text-gray-600">거래량</p>
                   <p className="font-semibold text-gray-900">{(selectedStockData.volume / 1000000).toFixed(1)}M</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* 연도별 가격 선형 그래프 (현재 연도 기준 이전까지) */}
+          {selectedStockData && chartData.length >= 2 && currentYear != null && (
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">연도별 주가 ({chartData[0].year}년 ~ {currentYear}년)</h3>
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <PriceLineChart data={chartData} width="100%" height={200} />
               </div>
             </div>
           )}

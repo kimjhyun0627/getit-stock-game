@@ -99,17 +99,13 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ news }) => {
             </span>
             <div className="flex items-center space-x-2 text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-full">
               <Clock className="w-4 h-4" />
-              <span>{new Date(currentNews.date).toLocaleDateString('ko-KR')}</span>
+              <span>{currentNews.publishYear != null ? `${currentNews.publishYear}년` : '미설정'}</span>
             </div>
           </div>
         </div>
         
-        <h3 className="text-2xl font-bold text-gray-900 mb-4 line-clamp-2 leading-tight">
-          {currentNews.title}
-        </h3>
-        
-        <p className="text-gray-600 text-lg leading-relaxed line-clamp-3 mb-6">
-          {currentNews.summary}
+        <p className="text-gray-900 text-xl font-semibold leading-relaxed line-clamp-4 mb-6">
+          {currentNews.content}
         </p>
 
         {/* 추가 정보 */}

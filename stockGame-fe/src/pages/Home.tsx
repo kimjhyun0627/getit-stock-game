@@ -259,17 +259,14 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
-                          {item.title}
-                        </h3>
-                        <p className="text-blue-100 text-sm line-clamp-3 mb-3">
-                          {item.summary}
+                        <p className="text-lg font-semibold text-white mb-2 line-clamp-2">
+                          {item.content}
                         </p>
                         <div className="flex items-center justify-between text-xs text-blue-200">
                           <span className="bg-white/20 px-2 py-1 rounded-full">
                             {item.category}
                           </span>
-                          <span>{new Date(item.createdAt).toLocaleDateString('ko-KR')}</span>
+                          <span>{item.publishYear != null ? `${item.publishYear}년` : '미설정'}</span>
                         </div>
                       </div>
                     </div>

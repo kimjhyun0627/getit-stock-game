@@ -33,12 +33,11 @@ interface Stock {
 
 interface News {
   id: string;
-  title: string;
-  summary: string;
   content: string;
-  category: string; // 주식 심볼 또는 기본 카테고리
+  category: string;
   isPublished: boolean;
-  publishedAt?: string;
+  publishYear?: number | null;
+  reliability?: string | null;
 }
 
 interface LeaderboardEntry {
@@ -65,11 +64,11 @@ interface StockFormData {
 
 // 뉴스 추가를 위한 폼 데이터
 interface NewsFormData {
-  title: string;
-  summary: string;
   content: string;
-  category: string; // 주식 심볼 또는 기본 카테고리
+  category: string;
   isPublished: boolean;
+  publishYear: number | null;
+  reliability: string | null;
 }
 
 const Admin: React.FC = () => {
@@ -98,11 +97,11 @@ const Admin: React.FC = () => {
   const [editingNews, setEditingNews] = useState<News | null>(null);
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [newsFormData, setNewsFormData] = useState<NewsFormData>({
-    title: '',
-    summary: '',
     content: '',
     category: 'all',
-    isPublished: false
+    isPublished: false,
+    publishYear: null,
+    reliability: null
   });
   const [newsCurrentYear, setNewsCurrentYear] = useState<number | null>(null);
   const [newsCurrentYearInput, setNewsCurrentYearInput] = useState('');
@@ -153,7 +152,18 @@ const Admin: React.FC = () => {
       
       setUsers(usersData || []);
       setStocks(stocksData || []);
-      setNews(newsData || []);
+
+      const sortedNews = (newsData || []).slice().sort((a: News, b: News) => {
+        const yearA = a.publishYear ?? 9999;
+        const yearB = b.publishYear ?? 9999;
+        if (yearA !== yearB) return yearA - yearB;
+        const relOrder: Record<string, number> = { ALL: 0, LOW: 1, MEDIUM: 2, HIGH: 3, YEAR_END: 4 };
+        const relA = relOrder[a.reliability ?? ''] ?? 99;
+        const relB = relOrder[b.reliability ?? ''] ?? 99;
+        if (relA !== relB) return relA - relB;
+        return (a.category ?? '').localeCompare(b.category ?? '');
+      });
+      setNews(sortedNews);
       setLeaderboard(leaderboardData || []);
     } catch {
       setError('데이터를 불러오는데 실패했습니다.');
@@ -189,18 +199,24 @@ const Admin: React.FC = () => {
   // 주식 관리 함수들
   const handleStockCreate = async () => {
     try {
+      const payload = {
+        name: stockFormData.name?.trim() ?? '',
+        symbol: stockFormData.symbol?.trim() ?? '',
+        currentPrice: Number(stockFormData.currentPrice) || 0,
+        volume: Number(stockFormData.volume) || 0,
+      };
       await apiFetch('/stocks', {
         method: 'POST',
-        body: JSON.stringify(stockFormData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
       fetchData();
       setShowStockForm(false);
       setStockFormData({ name: '', symbol: '', currentPrice: 0, volume: 0 });
-      
-      // 주식 데이터 변경 알림 - 뉴스 페이지 새로고침 트리거
+
       window.dispatchEvent(new CustomEvent('stocksUpdated'));
-    } catch {
-      setError('주식 추가에 실패했습니다.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '주식 추가에 실패했습니다.');
     }
   };
 
@@ -261,7 +277,7 @@ const Admin: React.FC = () => {
       });
       fetchData();
       setShowNewsForm(false);
-      setNewsFormData({ title: '', summary: '', content: '', category: 'all', isPublished: false });
+      setNewsFormData({ content: '', category: 'all', isPublished: false, publishYear: null, reliability: null });
     } catch {
       setError('뉴스 추가에 실패했습니다.');
     }
@@ -300,11 +316,11 @@ const Admin: React.FC = () => {
     }
     
     const validUpdates = {
-      title: updates.title,
-      summary: updates.summary,
       content: updates.content,
       category: updates.category,
-      isPublished: updates.isPublished
+      isPublished: updates.isPublished,
+      publishYear: updates.publishYear,
+      reliability: updates.reliability
     };
     
     const cleanUpdates = Object.fromEntries(
@@ -338,7 +354,8 @@ const Admin: React.FC = () => {
     try {
       await apiFetch(`/news/${newsId}/publish`, {
         method: 'PUT',
-        body: JSON.stringify({ isPublished })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPublished }),
       });
       fetchData();
     } catch {
@@ -558,7 +575,7 @@ const Admin: React.FC = () => {
                 <h2 className="text-xl font-semibold text-gray-900">뉴스 관리</h2>
                 <button
                   onClick={() => {
-                    setNewsFormData({ title: '', summary: '', content: '', category: 'all', isPublished: false });
+                    setNewsFormData({ content: '', category: 'all', isPublished: false, publishYear: null, reliability: null });
                     setShowNewsForm(true);
                   }}
                   className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center space-x-2"
@@ -572,42 +589,38 @@ const Admin: React.FC = () => {
                 {news.map((item) => (
                   <div key={item.id} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{item.summary}</p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-900 mb-2 line-clamp-2">{item.content}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            item.category === 'all' ? 'bg-gray-100 text-gray-700' :
-                            'bg-purple-100 text-purple-700' // 주식 카테고리
+                            item.category === 'all' ? 'bg-gray-100 text-gray-700' : 'bg-purple-100 text-purple-700'
                           }`}>
-                            {item.category === 'all' ? '전체' :
-                             stocks.find(s => s.symbol === item.category)?.name || item.category}
+                            {item.category === 'all' ? '전체' : stocks.find(s => s.symbol === item.category)?.name || item.category}
                           </span>
-                          <span>{item.isPublished ? '게시됨' : '임시저장'}</span>
-                          <span>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ko-KR') : '날짜 없음'}</span>
+                          <span>공개 연도: {item.publishYear != null ? `${item.publishYear}년` : '미설정'}</span>
+                          <span>{item.isPublished ? '게시됨' : '비공개'}</span>
+                          {item.reliability && (
+                            <span className="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-800">
+                              신뢰도: {item.reliability === 'HIGH' ? '상' : item.reliability === 'MEDIUM' ? '중' : item.reliability === 'LOW' ? '하' : item.reliability === 'ALL' ? '전체 공개' : item.reliability === 'YEAR_END' ? '전년도 결산' : item.reliability}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => setEditingNews(item)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <button
                           onClick={() => handleNewsPublish(item.id, !item.isPublished)}
                           className={`px-2 py-1 text-xs rounded ${
-                            item.isPublished 
-                              ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' 
+                            item.isPublished
+                              ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                               : 'bg-green-100 text-green-800 hover:bg-green-200'
                           }`}
                         >
-                          {item.isPublished ? '게시 취소' : '게시'}
+                          {item.isPublished ? '비공개로' : '게시하기'}
                         </button>
-                        <button
-                          onClick={() => handleNewsDelete(item.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
+                        <button onClick={() => setEditingNews(item)} className="text-blue-600 hover:text-blue-800">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleNewsDelete(item.id)} className="text-red-600 hover:text-red-800">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -1061,32 +1074,12 @@ const Admin: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4">뉴스 추가</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
-                <input
-                  type="text"
-                  value={newsFormData.title}
-                  onChange={(e) => setNewsFormData({...newsFormData, title: e.target.value})}
-                  placeholder="뉴스 제목을 입력하세요"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">요약</label>
-                <textarea
-                  value={newsFormData.summary}
-                  onChange={(e) => setNewsFormData({...newsFormData, summary: e.target.value})}
-                  placeholder="뉴스 요약을 입력하세요"
-                  rows={3}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
                 <textarea
                   value={newsFormData.content}
                   onChange={(e) => setNewsFormData({...newsFormData, content: e.target.value})}
                   placeholder="뉴스 내용을 입력하세요"
-                  rows={6}
+                  rows={8}
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                 />
               </div>
@@ -1098,12 +1091,45 @@ const Admin: React.FC = () => {
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                 >
                   <option value="all">전체</option>
-                  {/* 주식 기반 카테고리만 표시 */}
                   {stocks.map((stock) => (
                     <option key={stock.symbol} value={stock.symbol}>
                       {stock.name} ({stock.symbol})
                     </option>
                   ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">공개 연도</label>
+                <select
+                  value={newsFormData.publishYear ?? ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setNewsFormData({ ...newsFormData, publishYear: v === '' ? null : parseInt(v, 10) });
+                  }}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                >
+                  <option value="">미설정</option>
+                  {Array.from(
+                    { length: (gameEndYear ?? 2026) - (gameStartYear ?? 2022) + 1 },
+                    (_, i) => (gameStartYear ?? 2022) + i
+                  ).map((y) => (
+                    <option key={y} value={y}>{y}년</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">신뢰도</label>
+                <select
+                  value={newsFormData.reliability ?? ''}
+                  onChange={(e) => setNewsFormData({ ...newsFormData, reliability: e.target.value || null })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                >
+                  <option value="">선택</option>
+                  <option value="HIGH">상</option>
+                  <option value="MEDIUM">중</option>
+                  <option value="LOW">하</option>
+                  <option value="ALL">전체 공개</option>
+                  <option value="YEAR_END">전년도 결산</option>
                 </select>
               </div>
               <div className="flex items-center">
@@ -1144,29 +1170,11 @@ const Admin: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4">뉴스 수정</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
-                <input
-                  type="text"
-                  value={editingNews.title}
-                  onChange={(e) => setEditingNews({...editingNews, title: e.target.value})}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">요약</label>
-                <textarea
-                  value={editingNews.summary}
-                  onChange={(e) => setEditingNews({...editingNews, summary: e.target.value})}
-                  rows={3}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
                 <textarea
                   value={editingNews.content}
                   onChange={(e) => setEditingNews({...editingNews, content: e.target.value})}
-                  rows={6}
+                  rows={8}
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                 />
               </div>
@@ -1178,12 +1186,45 @@ const Admin: React.FC = () => {
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                 >
                   <option value="all">전체</option>
-                  {/* 주식 기반 카테고리만 표시 */}
                   {stocks.map((stock) => (
                     <option key={stock.symbol} value={stock.symbol}>
                       {stock.name} ({stock.symbol})
                     </option>
                   ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">공개 연도</label>
+                <select
+                  value={editingNews.publishYear ?? ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setEditingNews({ ...editingNews, publishYear: v === '' ? null : parseInt(v, 10) });
+                  }}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                >
+                  <option value="">미설정</option>
+                  {Array.from(
+                    { length: (gameEndYear ?? 2026) - (gameStartYear ?? 2022) + 1 },
+                    (_, i) => (gameStartYear ?? 2022) + i
+                  ).map((y) => (
+                    <option key={y} value={y}>{y}년</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">신뢰도</label>
+                <select
+                  value={editingNews.reliability ?? ''}
+                  onChange={(e) => setEditingNews({ ...editingNews, reliability: e.target.value || null })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                >
+                  <option value="">선택</option>
+                  <option value="HIGH">상</option>
+                  <option value="MEDIUM">중</option>
+                  <option value="LOW">하</option>
+                  <option value="ALL">전체 공개</option>
+                  <option value="YEAR_END">전년도 결산</option>
                 </select>
               </div>
             </div>
