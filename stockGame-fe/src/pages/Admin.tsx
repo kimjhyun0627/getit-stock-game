@@ -13,6 +13,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { apiFetch } from '../utils/api';
+import { sortNews } from '../services/api';
 
 interface User {
   id: string;
@@ -153,17 +154,7 @@ const Admin: React.FC = () => {
       setUsers(usersData || []);
       setStocks(stocksData || []);
 
-      const sortedNews = (newsData || []).slice().sort((a: News, b: News) => {
-        const yearA = a.publishYear ?? 9999;
-        const yearB = b.publishYear ?? 9999;
-        if (yearA !== yearB) return yearA - yearB;
-        const relOrder: Record<string, number> = { ALL: 0, LOW: 1, MEDIUM: 2, HIGH: 3, YEAR_END: 4 };
-        const relA = relOrder[a.reliability ?? ''] ?? 99;
-        const relB = relOrder[b.reliability ?? ''] ?? 99;
-        if (relA !== relB) return relA - relB;
-        return (a.category ?? '').localeCompare(b.category ?? '');
-      });
-      setNews(sortedNews);
+      setNews(sortNews(newsData || []));
       setLeaderboard(leaderboardData || []);
     } catch {
       setError('데이터를 불러오는데 실패했습니다.');

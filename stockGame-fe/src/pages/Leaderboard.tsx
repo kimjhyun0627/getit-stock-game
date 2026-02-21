@@ -199,82 +199,94 @@ const Leaderboard: React.FC = () => {
               <p className="text-sm">사용자들이 주식을 거래하면 순위가 표시됩니다.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      순위
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      사용자
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      총 자산
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      현금
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      주식 가치
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      수익/손실
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {leaderboard.map((entry) => (
-                    <tr key={entry.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {getRankIcon(entry.rank)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {entry.username}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-bold text-gray-900">
-                          {formatPrice(entry.totalAssets)}원
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-600">
-                          {formatPrice(entry.cashBalance)}원
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-600">
-                          {formatPrice(entry.stockValue)}원
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          {getProfitLossIcon(entry.profitLoss)}
-                          <div className={`text-sm font-medium ${getProfitLossColor(entry.profitLoss)}`}>
-                            {entry.profitLoss > 0 ? '+' : ''}{formatPrice(entry.profitLoss)}원
-                          </div>
-                          <div className={`text-xs ${getProfitLossColor(entry.profitLoss)}`}>
-                            ({entry.profitLossPercent > 0 ? '+' : ''}{entry.profitLossPercent.toFixed(2)}%)
-                          </div>
-                        </div>
-                      </td>
+            <>
+              {/* 모바일: 카드형 리스트 */}
+              <div className="md:hidden divide-y divide-gray-100">
+                {leaderboard.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="flex items-center gap-4 px-4 py-4 active:bg-gray-50"
+                  >
+                    <div className="flex-shrink-0 w-10 text-center">
+                      {getRankIcon(entry.rank)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {entry.username}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        현금 {formatPrice(entry.cashBalance)} · 주식 {formatPrice(entry.stockValue)}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      <p className="text-sm font-semibold text-gray-900 tabular-nums">
+                        {formatPrice(entry.totalAssets)}원
+                      </p>
+                      <p className={`text-xs font-medium tabular-nums ${getProfitLossColor(entry.profitLoss)}`}>
+                        {entry.profitLoss > 0 ? '+' : ''}{formatPrice(entry.profitLoss)}원
+                        ({entry.profitLossPercent > 0 ? '+' : ''}{entry.profitLossPercent.toFixed(2)}%)
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* 데스크톱: 테이블 */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">순위</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">사용자</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">총 자산</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">현금</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">주식 가치</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">수익/손실</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {leaderboard.map((entry) => (
+                      <tr key={entry.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">{getRankIcon(entry.rank)}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{entry.username}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-bold text-gray-900">{formatPrice(entry.totalAssets)}원</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-600">{formatPrice(entry.cashBalance)}원</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-600">{formatPrice(entry.stockValue)}원</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center space-x-2">
+                            {getProfitLossIcon(entry.profitLoss)}
+                            <div className={`text-sm font-medium ${getProfitLossColor(entry.profitLoss)}`}>
+                              {entry.profitLoss > 0 ? '+' : ''}{formatPrice(entry.profitLoss)}원
+                            </div>
+                            <div className={`text-xs ${getProfitLossColor(entry.profitLoss)}`}>
+                              ({entry.profitLossPercent > 0 ? '+' : ''}{entry.profitLossPercent.toFixed(2)}%)
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
 
         {/* 새로고침 버튼 */}
         <div className="text-center mt-8">
           <button
+            type="button"
             onClick={fetchLeaderboard}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 btn-hover-effect"
+            className="min-h-[48px] bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 sm:px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl active:scale-[0.98] sm:hover:scale-105 sm:hover:-translate-y-1 transition-all duration-300 touch-manipulation"
           >
             <div className="flex items-center space-x-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

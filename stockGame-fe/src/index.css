@@ -1,4 +1,4 @@
-/* 기본 스타일 테스트 */
+/* 기본 스타일 - 모바일 우선 */
 body {
   margin: 0;
   padding: 0;
@@ -9,6 +9,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
+  font-size: 16px;
+}
+
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
 }
 
 /* 커스텀 스타일 */

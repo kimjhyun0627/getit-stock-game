@@ -30,8 +30,8 @@ const NewsModal: React.FC<NewsModalProps> = ({ news, isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-300">
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100 animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-300">
+      <div className="bg-white w-full max-h-[95dvh] sm:max-h-[90vh] rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl overflow-hidden flex flex-col transition-all duration-300">
         {/* 헤더 - 그라데이션 배경 */}
         <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white p-4 sm:p-6 md:p-8">
           {/* 배경 장식 */}
@@ -61,7 +61,8 @@ const NewsModal: React.FC<NewsModalProps> = ({ news, isOpen, onClose }) => {
               </div>
               <button
                 onClick={onClose}
-                className="text-white/80 hover:text-white transition-all duration-200 hover:scale-110 bg-white/10 hover:bg-white/20 p-2 rounded-full backdrop-blur-sm self-end sm:self-start"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center -m-2 text-white/80 hover:text-white transition-all duration-200 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm self-end sm:self-start active:scale-95 touch-manipulation"
+                aria-label="닫기"
               >
                 <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
@@ -70,14 +71,20 @@ const NewsModal: React.FC<NewsModalProps> = ({ news, isOpen, onClose }) => {
         </div>
 
         {/* 본문 내용 */}
-        <div className="p-4 sm:p-6 md:p-8">
+        <div className="p-4 sm:p-6 md:p-8 flex-1 overflow-auto min-h-0">
           <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm sm:text-base bg-gray-50 p-3 sm:p-4 md:p-6 rounded-xl border border-gray-100">
             {news.content}
           </div>
         </div>
 
-        {/* 푸터 - 공개 연도만 */}
+        {/* 푸터 - 공개 연도 + 모바일 닫기 버튼 */}
         <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 bg-gradient-to-r from-gray-50 to-blue-50/30 border-t border-gray-100">
+          <button
+            onClick={onClose}
+            className="w-full min-h-[48px] sm:hidden mb-3 py-3 rounded-xl font-medium text-gray-700 bg-white border border-gray-200 active:scale-[0.98] touch-manipulation"
+          >
+            닫기
+          </button>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
             <div className="text-xs sm:text-sm text-gray-600">
               공개 연도: {news.publishYear != null ? `${news.publishYear}년` : '미설정'}

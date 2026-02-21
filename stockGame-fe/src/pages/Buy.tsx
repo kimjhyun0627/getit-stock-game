@@ -10,7 +10,7 @@ interface PricePoint {
 
 const PAD = 32;
 
-function PriceLineChart({ data, width, height }: { data: PricePoint[]; width: string; height: number }) {
+function PriceLineChart({ data, height }: { data: PricePoint[]; height: number }) {
   const [selected, setSelected] = useState<PricePoint | null>(null);
   if (data.length === 0) return null;
   const minYear = Math.min(...data.map((d) => d.year));
@@ -384,7 +384,7 @@ const Buy: React.FC = () => {
                 연도별 주가 ({chartData[0].year}년 ~ {currentYear}년)
               </h3>
               <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <PriceLineChart data={chartData} width="100%" height={200} />
+                <PriceLineChart data={chartData} height={200} />
               </div>
             </div>
           )}
@@ -394,27 +394,32 @@ const Buy: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               매수 수량
             </label>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => handleQuantityChange(-1)}
-                className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors"
+                className="min-w-[44px] min-h-[44px] w-11 h-11 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 active:scale-95 transition-transform touch-manipulation text-lg font-medium"
+                aria-label="수량 감소"
               >
-                -
+                −
               </button>
               <input
                 type="number"
+                inputMode="numeric"
                 value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 min="1"
-                className="w-20 text-center border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-20 min-h-[44px] text-center border border-gray-300 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button
+                type="button"
                 onClick={() => handleQuantityChange(1)}
-                className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors"
+                className="min-w-[44px] min-h-[44px] w-11 h-11 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 active:scale-95 transition-transform touch-manipulation text-lg font-medium"
+                aria-label="수량 증가"
               >
                 +
               </button>
-              <span className="text-sm text-gray-600">주</span>
+              <span className="text-sm sm:text-base text-gray-600">주</span>
             </div>
           </div>
 
@@ -445,12 +450,13 @@ const Buy: React.FC = () => {
 
           {/* 매수 버튼 */}
           <button
+            type="button"
             onClick={handleBuy}
             disabled={!selectedStock || !canAfford || isLoading}
-            className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 ${
+            className={`w-full min-h-[48px] py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 touch-manipulation active:scale-[0.98] ${
               !selectedStock || !canAfford || isLoading
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 btn-hover-effect'
+                : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl sm:hover:scale-[1.02] sm:hover:-translate-y-0.5'
             }`}
           >
             {isLoading ? '매수 처리 중...' : '매수하기'}

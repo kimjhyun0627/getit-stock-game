@@ -320,28 +320,33 @@ const Sell: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     매도 수량
                   </label>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-3">
                     <button
+                      type="button"
                       onClick={() => handleQuantityChange(-1)}
-                      className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors"
+                      className="min-w-[44px] min-h-[44px] w-11 h-11 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 active:scale-95 transition-transform touch-manipulation text-lg font-medium"
+                      aria-label="수량 감소"
                     >
-                      -
+                      −
                     </button>
                     <input
                       type="number"
+                      inputMode="numeric"
                       value={sellQuantity}
                       onChange={(e) => setSellQuantity(Math.max(1, Math.min(selectedItem.quantity, parseInt(e.target.value) || 1)))}
                       min="1"
                       max={selectedItem.quantity}
-                      className="w-20 text-center border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-20 min-h-[44px] text-center border border-gray-300 rounded-lg px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <button
+                      type="button"
                       onClick={() => handleQuantityChange(1)}
-                      className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 transition-colors"
+                      className="min-w-[44px] min-h-[44px] w-11 h-11 bg-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-300 active:scale-95 transition-transform touch-manipulation text-lg font-medium"
+                      aria-label="수량 증가"
                     >
                       +
                     </button>
-                    <span className="text-sm text-gray-600">주</span>
+                    <span className="text-sm sm:text-base text-gray-600">주</span>
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
                     최대 {selectedItem.quantity}주까지 매도 가능
@@ -369,12 +374,13 @@ const Sell: React.FC = () => {
 
                 {/* 매도 버튼 */}
                 <button
+                  type="button"
                   onClick={handleSell}
                   disabled={isLoading || !selectedItem?.currentPrice || selectedItem.currentPrice <= 0}
-                  className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 ${
+                  className={`w-full min-h-[48px] py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 touch-manipulation active:scale-[0.98] ${
                     isLoading || !selectedItem?.currentPrice || selectedItem.currentPrice <= 0
                       ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 btn-hover-effect'
+                      : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg hover:shadow-xl sm:hover:scale-[1.02] sm:hover:-translate-y-0.5'
                   }`}
                 >
                   {isLoading ? '매도 처리 중...' : 

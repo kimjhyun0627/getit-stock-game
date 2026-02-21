@@ -123,7 +123,7 @@ function App() {
           isLoggedIn={isLoggedIn} 
           setIsLoggedIn={setIsLoggedIn}
         />
-                <main>
+                <main className="pb-20 lg:pb-0">
           <PageTransition>
             <Routes>
               <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />

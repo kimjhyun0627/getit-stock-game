@@ -49,11 +49,31 @@ export const stocksApi = {
     }),
 };
 
+/** 뉴스 공통 정렬: 공개 연도 내림차순 → 신뢰도(전년도 결산, 상, 중, 하, 전체공개) → 카테고리순 (관리자/일반 동일) */
+export function sortNews(list: News[]): News[] {
+  const relOrder: Record<string, number> = {
+    YEAR_END: 0,
+    HIGH: 1,
+    MEDIUM: 2,
+    LOW: 3,
+    ALL: 4,
+  };
+  return [...list].sort((a, b) => {
+    const yearA = a.publishYear ?? -1;
+    const yearB = b.publishYear ?? -1;
+    if (yearA !== yearB) return yearB - yearA;
+    const rA = relOrder[a.reliability ?? ''] ?? 99;
+    const rB = relOrder[b.reliability ?? ''] ?? 99;
+    if (rA !== rB) return rA - rB;
+    return (a.category || '').localeCompare(b.category || '', 'ko');
+  });
+}
+
 // 뉴스 관련 API
 export const newsApi = {
   getAll: (): Promise<News[]> => apiFetch('/news'),
   getPublished: (year?: number | null): Promise<News[]> =>
-    apiFetch(year != null ? `/news/published?year=${year}` : '/news/published'),
+    apiFetch(year != null ? `/news/published?year=${year}` : '/news/published').then((data: News[]) => sortNews(data)),
   getCurrentYear: (): Promise<{ currentYear: number }> => apiFetch('/news/current-year'),
   getGamePeriod: (): Promise<{ startYear: number; endYear: number }> => apiFetch('/news/game-period'),
   getByCategory: (category: string): Promise<News[]> => apiFetch(`/news/category/${category}`),

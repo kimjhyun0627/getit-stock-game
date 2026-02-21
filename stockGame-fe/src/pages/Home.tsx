@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StockPriceBoard from '../components/StockPriceBoard';
 import NewsModal from '../components/NewsModal';
+import LoginRequiredModal from '../components/LoginRequiredModal';
 
 import { useStockData } from '../hooks/useStockData';
 import { newsApi } from '../services/api';
@@ -19,6 +20,7 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [nextRefresh, setNextRefresh] = useState<Date>(new Date(Date.now() + 30000));
+  const [showLoginRequired, setShowLoginRequired] = useState(false);
   const navigate = useNavigate();
 
   // 거래량 포맷팅 함수
@@ -64,10 +66,9 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
 
   const handleStockClick = (stock: unknown) => {
     if (!isLoggedIn) {
-      alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
+      setShowLoginRequired(true);
       return;
     }
-    // 주식 클릭 시 매수 페이지로 이동
     navigate('/buy', { state: { selectedStock: stock } });
   };
 
@@ -355,6 +356,14 @@ const Home: React.FC<HomeProps> = ({ isLoggedIn }) => {
         news={selectedNews}
         isOpen={isNewsModalOpen}
         onClose={closeNewsModal}
+      />
+      <LoginRequiredModal
+        isOpen={showLoginRequired}
+        onClose={() => setShowLoginRequired(false)}
+        onLogin={() => {
+          setShowLoginRequired(false);
+          navigate('/login');
+        }}
       />
     </div>
   );
