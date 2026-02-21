@@ -26,12 +26,12 @@ public class AuthController {
 
     @GetMapping("/kakao/login")
     public AuthDto.OAuthUrlResponse kakaoLogin() {
-        return new AuthDto.OAuthUrlResponse(authService.getKakaoAuthUrl());
+        return AuthDto.OAuthUrlResponse.of(authService.getKakaoAuthUrl());
     }
 
     @GetMapping("/google/login")
     public AuthDto.OAuthUrlResponse googleLogin() {
-        return new AuthDto.OAuthUrlResponse(authService.getGoogleAuthUrl());
+        return AuthDto.OAuthUrlResponse.of(authService.getGoogleAuthUrl());
     }
 
     @GetMapping("/kakao/callback")
@@ -43,9 +43,9 @@ public class AuthController {
         try {
             AuthDto.AuthTokensResponse result = authService.kakaoLogin(code);
             ObjectMapper om = new ObjectMapper();
-            String userJson = om.writeValueAsString(result.getUser());
-            String redirectUrl = frontendUrl + "/auth/kakao/callback?accessToken=" + result.getAccessToken()
-                    + "&refreshToken=" + result.getRefreshToken()
+            String userJson = om.writeValueAsString(result.user());
+            String redirectUrl = frontendUrl + "/auth/kakao/callback?accessToken=" + result.accessToken()
+                    + "&refreshToken=" + result.refreshToken()
                     + "&user=" + URLEncoder.encode(userJson, StandardCharsets.UTF_8);
             URI location = Objects.requireNonNull(URI.create(redirectUrl));
             return ResponseEntity.status(HttpStatus.FOUND).location(location).build();
@@ -64,9 +64,9 @@ public class AuthController {
         try {
             AuthDto.AuthTokensResponse result = authService.googleLogin(code);
             ObjectMapper om = new ObjectMapper();
-            String userJson = om.writeValueAsString(result.getUser());
-            String redirectUrl = frontendUrl + "/auth/google/callback?accessToken=" + result.getAccessToken()
-                    + "&refreshToken=" + result.getRefreshToken()
+            String userJson = om.writeValueAsString(result.user());
+            String redirectUrl = frontendUrl + "/auth/google/callback?accessToken=" + result.accessToken()
+                    + "&refreshToken=" + result.refreshToken()
                     + "&user=" + URLEncoder.encode(userJson, StandardCharsets.UTF_8);
             URI location = Objects.requireNonNull(URI.create(redirectUrl));
             return ResponseEntity.status(HttpStatus.FOUND).location(location).build();
@@ -78,7 +78,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public AuthDto.AuthTokensResponse refresh(@RequestBody AuthDto.RefreshRequest body) {
-        return authService.refreshToken(body.getRefreshToken());
+        return authService.refreshToken(body.refreshToken());
     }
 
     public record ErrorBody(int statusCode, String message) {}

@@ -180,17 +180,6 @@ public class AuthService {
     }
 
     private static AuthDto.AuthTokensResponse toAuthResponse(User user, String accessToken, String refreshToken) {
-        return AuthDto.AuthTokensResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .user(AuthDto.AuthTokensResponse.UserInfo.builder()
-                        .id(user.getId())
-                        .name(user.getName())
-                        .nickname(user.getNickname())
-                        .email(user.getEmail())
-                        .role(user.getRole().name())
-                        .balance(user.getBalance())
-                        .build())
-                .build();
+        return AuthDto.AuthTokensResponse.from(user, accessToken, refreshToken);
     }
 }

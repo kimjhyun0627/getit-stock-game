@@ -1,49 +1,50 @@
 package kr.knu.getit.stockgame.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import kr.knu.getit.stockgame.entity.User;
 
 import java.math.BigDecimal;
 
 public class AuthDto {
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AuthTokensResponse {
-        private String accessToken;
-        private String refreshToken;
-        private UserInfo user;
-
-        @Data
-        @Builder
-        @NoArgsConstructor
-        @AllArgsConstructor
-        public static class UserInfo {
-            private String id;
-            private String name;
-            private String nickname;
-            private String email;
-            private String role;
-            private BigDecimal balance;
+    public record UserInfo(
+            String id,
+            String name,
+            String nickname,
+            String email,
+            String role,
+            BigDecimal balance
+    ) {
+        public static UserInfo from(User user) {
+            return new UserInfo(
+                    user.getId(),
+                    user.getName(),
+                    user.getNickname(),
+                    user.getEmail(),
+                    user.getRole().name(),
+                    user.getBalance()
+            );
         }
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RefreshRequest {
-        private String refreshToken;
+    public record AuthTokensResponse(
+            String accessToken,
+            String refreshToken,
+            UserInfo user
+    ) {
+        public static AuthTokensResponse from(User user, String accessToken, String refreshToken) {
+            return new AuthTokensResponse(
+                    accessToken,
+                    refreshToken,
+                    UserInfo.from(user)
+            );
+        }
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OAuthUrlResponse {
-        private String url;
+    public record RefreshRequest(String refreshToken) {}
+
+    public record OAuthUrlResponse(String url) {
+        public static OAuthUrlResponse of(String url) {
+            return new OAuthUrlResponse(url);
+        }
     }
 }

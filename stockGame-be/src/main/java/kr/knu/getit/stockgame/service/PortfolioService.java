@@ -140,17 +140,7 @@ public class PortfolioService {
             double profitLossPercent = p.getAveragePrice() != 0
                     ? (profitLoss / (p.getAveragePrice() * p.getQuantity())) * 100
                     : 0;
-            PortfolioDto.PortfolioResponse r = new PortfolioDto.PortfolioResponse();
-            r.setStockId(p.getStockId());
-            r.setStockName(s.getName());
-            r.setSymbol(s.getSymbol());
-            r.setQuantity(p.getQuantity());
-            r.setAveragePrice(p.getAveragePrice());
-            r.setCurrentPrice(currentPrice);
-            r.setTotalValue(totalValue);
-            r.setProfitLoss(profitLoss);
-            r.setProfitLossPercent(profitLossPercent);
-            return r;
+            return PortfolioDto.PortfolioResponse.from(p, s, currentPrice, totalValue, profitLoss, profitLossPercent);
         }).filter(r -> r != null).collect(Collectors.toList());
     }
 
@@ -160,17 +150,7 @@ public class PortfolioService {
         return list.stream().map(t -> {
             Transaction tx = Objects.requireNonNull(t);
             Stock s = stockRepository.findById(tx.getStockId()).orElse(null);
-            PortfolioDto.TransactionResponse r = new PortfolioDto.TransactionResponse();
-            r.setId(tx.getId());
-            r.setStockId(tx.getStockId());
-            r.setStockName(s != null ? s.getName() : "");
-            r.setSymbol(s != null ? s.getSymbol() : "");
-            r.setType(tx.getType() == TransactionType.BUY ? "buy" : "sell");
-            r.setQuantity(tx.getQuantity());
-            r.setPrice(tx.getPrice());
-            r.setTotalAmount(tx.getTotalAmount());
-            r.setCreatedAt(tx.getCreatedAt() != null ? tx.getCreatedAt().toString() : null);
-            return r;
+            return PortfolioDto.TransactionResponse.from(tx, s);
         }).collect(Collectors.toList());
     }
 
@@ -183,9 +163,7 @@ public class PortfolioService {
     public PortfolioDto.BalanceResponse getUserBalance(String userId) {
         User user = Objects.requireNonNull(userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.")));
-        PortfolioDto.BalanceResponse r = new PortfolioDto.BalanceResponse();
-        r.setBalance(user.getBalance());
-        return r;
+        return PortfolioDto.BalanceResponse.from(user.getBalance());
     }
 
     @Transactional(readOnly = true)
@@ -194,28 +172,15 @@ public class PortfolioService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주식을 찾을 수 없습니다.")));
         Long buyVol = transactionRepository.sumQuantityByStockIdAndType(stockId, TransactionType.BUY);
         Long sellVol = transactionRepository.sumQuantityByStockIdAndType(stockId, TransactionType.SELL);
-        PortfolioDto.VolumeStats s = new PortfolioDto.VolumeStats();
-        s.setTotalVolume(stock.getVolume());
-        s.setBuyVolume(buyVol != null ? buyVol : 0L);
-        s.setSellVolume(sellVol != null ? sellVol : 0L);
-        s.setLastUpdated(stock.getUpdatedAt());
-        return s;
+        return PortfolioDto.VolumeStats.from(stock.getVolume(), buyVol, sellVol, stock.getUpdatedAt());
     }
 
     @Transactional(readOnly = true)
     public List<PortfolioDto.VolumeStatsByStock> getAllStockVolumeStats() {
         return stockRepository.findAll().stream().map(stock -> {
             Stock s = Objects.requireNonNull(stock);
-            PortfolioDto.VolumeStatsByStock v = new PortfolioDto.VolumeStatsByStock();
             PortfolioDto.VolumeStats stats = getStockVolumeStats(s.getId());
-            v.setStockId(s.getId());
-            v.setStockName(s.getName());
-            v.setStockSymbol(s.getSymbol());
-            v.setTotalVolume(stats.getTotalVolume());
-            v.setBuyVolume(stats.getBuyVolume());
-            v.setSellVolume(stats.getSellVolume());
-            v.setLastUpdated(stats.getLastUpdated());
-            return v;
-        }).sorted((a, b) -> Long.compare(b.getTotalVolume(), a.getTotalVolume())).collect(Collectors.toList());
+            return PortfolioDto.VolumeStatsByStock.from(s, stats);
+        }).sorted((a, b) -> Long.compare(b.totalVolume(), a.totalVolume())).collect(Collectors.toList());
     }
 }

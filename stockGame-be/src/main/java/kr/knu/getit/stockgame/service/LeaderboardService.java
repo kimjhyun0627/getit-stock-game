@@ -83,22 +83,7 @@ public class LeaderboardService {
     @Transactional(readOnly = true)
     public List<LeaderboardDto.AdminLeaderboardResponse> getAdminLeaderboard() {
         List<LeaderboardEntry> list = leaderboardRepository.findAllByOrderByRankAsc();
-        return list.stream().map(e -> {
-            LeaderboardEntry entry = Objects.requireNonNull(e);
-            LeaderboardDto.AdminLeaderboardResponse r = new LeaderboardDto.AdminLeaderboardResponse();
-            r.setId(entry.getId());
-            r.setUsername(entry.getUsername());
-            r.setTotalAssets(entry.getTotalAssets());
-            r.setCashBalance(entry.getCashBalance());
-            r.setStockValue(entry.getStockValue());
-            r.setRank(entry.getRank());
-            r.setProfitLoss(entry.getProfitLoss());
-            r.setProfitLossPercent(entry.getProfitLossPercent());
-            r.setLastUpdated(entry.getLastUpdated() != null ? entry.getLastUpdated().toString() : null);
-            r.setIsVisible(entry.getIsVisible());
-            r.setUserId(Objects.requireNonNull(entry.getUserId()));
-            return r;
-        }).collect(Collectors.toList());
+        return list.stream().map(e -> LeaderboardDto.AdminLeaderboardResponse.from(Objects.requireNonNull(e))).collect(Collectors.toList());
     }
 
     @Transactional
@@ -122,26 +107,10 @@ public class LeaderboardService {
         Double avg = leaderboardRepository.getAverageAssets();
         Double top = leaderboardRepository.getTopAssets();
         Instant lastUpdated = leaderboardRepository.findMaxLastUpdated();
-        LeaderboardDto.LeaderboardStats s = new LeaderboardDto.LeaderboardStats();
-        s.setTotalParticipants(total);
-        s.setVisibleParticipants(visible);
-        s.setAverageAssets(avg != null ? avg : 0);
-        s.setTopAssets(top != null ? top : 0);
-        s.setLastUpdated(lastUpdated != null ? lastUpdated.toString() : Instant.now().toString());
-        return s;
+        return LeaderboardDto.LeaderboardStats.from(total, visible, avg, top, lastUpdated != null ? lastUpdated.toString() : null);
     }
 
     private LeaderboardDto.LeaderboardResponse toResponse(LeaderboardEntry e) {
-        LeaderboardDto.LeaderboardResponse r = new LeaderboardDto.LeaderboardResponse();
-        r.setId(e.getId());
-        r.setUsername(e.getUsername());
-        r.setTotalAssets(e.getTotalAssets());
-        r.setCashBalance(e.getCashBalance());
-        r.setStockValue(e.getStockValue());
-        r.setRank(e.getRank());
-        r.setProfitLoss(e.getProfitLoss());
-        r.setProfitLossPercent(e.getProfitLossPercent());
-        r.setLastUpdated(e.getLastUpdated() != null ? e.getLastUpdated().toString() : null);
-        return r;
+        return LeaderboardDto.LeaderboardResponse.from(e);
     }
 }

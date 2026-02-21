@@ -1,30 +1,66 @@
 package kr.knu.getit.stockgame.dto;
 
+import kr.knu.getit.stockgame.entity.LeaderboardEntry;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 public class LeaderboardDto {
 
-    @Data
-    public static class LeaderboardResponse {
-        private String id;
-        private String username;
-        private BigDecimal totalAssets;
-        private BigDecimal cashBalance;
-        private BigDecimal stockValue;
-        private Integer rank;
-        private BigDecimal profitLoss;
-        private BigDecimal profitLossPercent;
-        private String lastUpdated;
+    public record LeaderboardResponse(
+            String id,
+            String username,
+            BigDecimal totalAssets,
+            BigDecimal cashBalance,
+            BigDecimal stockValue,
+            Integer rank,
+            BigDecimal profitLoss,
+            BigDecimal profitLossPercent,
+            String lastUpdated
+    ) {
+        public static LeaderboardResponse from(LeaderboardEntry e) {
+            return new LeaderboardResponse(
+                    e.getId(),
+                    e.getUsername(),
+                    e.getTotalAssets(),
+                    e.getCashBalance(),
+                    e.getStockValue(),
+                    e.getRank(),
+                    e.getProfitLoss(),
+                    e.getProfitLossPercent(),
+                    e.getLastUpdated() != null ? e.getLastUpdated().toString() : null
+            );
+        }
     }
 
-    @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class AdminLeaderboardResponse extends LeaderboardResponse {
-        private Boolean isVisible;
-        private String userId;
+    public record AdminLeaderboardResponse(
+            String id,
+            String username,
+            BigDecimal totalAssets,
+            BigDecimal cashBalance,
+            BigDecimal stockValue,
+            Integer rank,
+            BigDecimal profitLoss,
+            BigDecimal profitLossPercent,
+            String lastUpdated,
+            Boolean isVisible,
+            String userId
+    ) {
+        public static AdminLeaderboardResponse from(LeaderboardEntry e) {
+            return new AdminLeaderboardResponse(
+                    e.getId(),
+                    e.getUsername(),
+                    e.getTotalAssets(),
+                    e.getCashBalance(),
+                    e.getStockValue(),
+                    e.getRank(),
+                    e.getProfitLoss(),
+                    e.getProfitLossPercent(),
+                    e.getLastUpdated() != null ? e.getLastUpdated().toString() : null,
+                    e.getIsVisible(),
+                    e.getUserId()
+            );
+        }
     }
 
     @Data
@@ -32,12 +68,21 @@ public class LeaderboardDto {
         private Boolean isVisible;
     }
 
-    @Data
-    public static class LeaderboardStats {
-        private Long totalParticipants;
-        private Long visibleParticipants;
-        private Double averageAssets;
-        private Double topAssets;
-        private String lastUpdated;
+    public record LeaderboardStats(
+            Long totalParticipants,
+            Long visibleParticipants,
+            Double averageAssets,
+            Double topAssets,
+            String lastUpdated
+    ) {
+        public static LeaderboardStats from(long totalParticipants, long visibleParticipants, Double averageAssets, Double topAssets, String lastUpdated) {
+            return new LeaderboardStats(
+                    totalParticipants,
+                    visibleParticipants,
+                    averageAssets != null ? averageAssets : 0,
+                    topAssets != null ? topAssets : 0,
+                    lastUpdated != null ? lastUpdated : java.time.Instant.now().toString()
+            );
+        }
     }
 }
