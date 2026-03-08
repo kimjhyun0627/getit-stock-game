@@ -1,0 +1,16 @@
+# stockgame.get-it.cloud — 자동 HTTPS (Let's Encrypt)
+# Caddy가 80/443을 사용하고, 인증서는 자동 발급·갱신됩니다.
+
+stockgame.get-it.cloud {
+	# API는 백엔드로 (X-Forwarded-* 전달로 Spring이 HTTPS 인식)
+	handle /api* {
+		reverse_proxy backend:3000 {
+			header_up X-Forwarded-Proto {request.scheme}
+			header_up X-Forwarded-Host {host}
+		}
+	}
+	# 나머지는 프론트엔드(정적 파일 + SPA)
+	handle {
+		reverse_proxy frontend:80
+	}
+}
